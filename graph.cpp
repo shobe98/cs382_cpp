@@ -39,7 +39,20 @@ struct ContLinkEdge {
     }
 };
 
- 
+struct CaseEdge {
+    int A, B, C; // labels and Case 
+    int value;
+    
+    // from, to, label, value 
+    CaseEdge(int A = 0, int B = 0, int C = 0, int value = 0) {
+        this->A = A;
+        this->C = C;
+        this->value = value;
+        this->B = B;
+
+    }
+}; // there will be a vector of lower case edges and a vector of upper case edges
+
 
 class STNU {
 public:
@@ -47,7 +60,7 @@ public:
     static const int kMaxLabels = 1000;
     
     // -INF, a value we use to code missing values, edges etc
-    static const int kNaN = ~0;
+    static const int kNaN = -1; // -1 for now
     
     // Labels, Ord Edges, Cont Links
     int N, M, K;
@@ -58,20 +71,22 @@ public:
     unordered_map<string, int> labelsToNum;
     vector<string> numsToLabel;
 
+    // index to the edge in the vector of edges or -1
     int ordEdges[kMaxLabels][kMaxLabels];
     
- 
-    ContLink contLinks[kMaxLabels][kMaxLabels];
+    int lcEdges[kMaxLabels][kMaxLabels];
+    int ucEdges[kMaxLabels][kMaxLabels];
 
-
-    // to get the allmax edges iterate first through the ordinary edges and then through the contlinks, assigning high to each contlink
+    // to get the allmax edges iterate first through the ordinary edges and then through the uc edges, assigning high to each contlink
     vector<OrdEdge> ordEdgesList;
-    vector<ContLinkEdge> contLinksList;
+    vector<CaseEdge> ucEdgesList;
+    vector<CaseEdge> lcEdgeList;
 
 
     // in these two vectors we save the edges we want to add to the graph. 
     vector<OrdEdge> lazyOrdEdges;
-    vector<ContLinkEdge> lazyContLinks;
+    vector<CaseEdge> lazyUcEdges;
+    vector<CaseEdge> lazyLcEdges;
 
 
 
@@ -81,11 +96,54 @@ public:
     }
 
     void addEdge(const ContLinkEdge& e) {
-        lazyContLinks.push_back(e);
+        // page 80/182 in notes 
+        lazyUcEdges.push_back(CaseEdge(e.B, e.A, e.B, -e.high));
+        lazyLcEdges.push_back(CaseEdge(e.A, e.B, e.B, e.low));
     }
 
     void updateAllLazyEdges() {
-        // TODO(astanciu): implement a function that adds all the new edges to the graph and clears the buffers (lazy edges vectors)
+        // TODO(somebody): refactor this duplicated code in a function call
+        for(auto &e : lazyOrdEdges) {
+            // if edge wasn't present add it to the list and keep track of the index in the matrix
+            if(ordEdges[e.A][e.B] == kNaN) {
+                ordEdges[e.A][e.B] = ordEdgesList.size();
+                ordEdgesList.push_back(e);
+            }
+            // if edge is present keep the smaller value for it
+            else {
+                ordEdgesList[ordEdges[e.a][e.B]].value = min(ordEdgesList[ordEdges[e.a][e.B]].value, e.value);
+            }
+        }
+
+        for(auto &e : lazyUcEdges) {
+            // if edge wasn't present add it to the list and keep track of the index in the matrix
+            if(ucEdges[e.A][e.B] == kNaN) {
+                ucEdges[e.A][e.B] = ucEdgesList.size();
+                ucEdgesList.push_back(e);
+            }
+            // if edge is present keep the smaller value for it
+            else {
+                ucEdgesList[ucEdges[e.a][e.B]].value = min(ucEdgesList[ucEdges[e.a][e.B]].value, e.value);
+            }
+        }
+
+
+        for(auto &e : lazyLcEdges) {
+            // if edge wasn't present add it to the list and keep track of the index in the matrix
+            if(lcEdges[e.A][e.B] == kNaN) {
+                lcEdges[e.A][e.B] = lcEdgesList.size();
+                lcEdgesList.push_back(e);
+            }
+            // if edge is present keep the *larger* value for it
+            else {
+                lcEdgesList[lcEdges[e.a][e.B]].value = max(lcEdgesList[lcEdges[e.a][e.B]].value, e.value);
+            }
+        }
+
+        lazyOrdEdges.clear();
+        lazyUcEdges.clear();
+        lazyLcEdges.clear();
+
     }
 };
 
