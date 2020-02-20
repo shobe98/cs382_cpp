@@ -81,9 +81,10 @@ public:
     unordered_map<string, int> labelsToNum;
     vector<string> numsToLabel;
 
+    // These  matrices are necessary to make sure we don't save duplicated edges (that would fuck up the complexity - say if an edge gets updated n times, we would otherwise have ncopies of it)
+    // I know this makes the code slightly messier, but should be fine for now
     // index to the edge in the vector of edges or -1
     int ordEdges[kMaxLabels][kMaxLabels];
-    
     int lcEdges[kMaxLabels][kMaxLabels];
     int ucEdges[kMaxLabels][kMaxLabels];
 
@@ -98,6 +99,10 @@ public:
     vector<CaseEdge> lazyUcEdges;
     vector<CaseEdge> lazyLcEdges;
 
+    // Lists of neighbours -> basically the matrices prof Hunsberger showed us.
+    vector<Neighbour> ordNeighbours[kMaxLabels];
+    vector<Neighbour> lcNeighbours[kMaxLabels];
+    vector<Neighbour> ucNeighbours[kMaxLabels];
 
 
 
@@ -111,6 +116,7 @@ public:
         lazyLcEdges.push_back(CaseEdge(e.A, e.B, e.B, e.low));
     }
 
+
     void updateAllLazyEdges() {
         // TODO(somebody): refactor this duplicated code in a function call
         for(auto &e : lazyOrdEdges) {
@@ -118,10 +124,12 @@ public:
             if(ordEdges[e.A][e.B] == kNaN) {
                 ordEdges[e.A][e.B] = ordEdgesList.size();
                 ordEdgesList.push_back(e);
+                
+                ordNeighbours[e.A].push_back(Neighbour(e.B, 'o')); // ordinary edge 
             }
             // if edge is present keep the smaller value for it
             else {
-                ordEdgesList[ordEdges[e.a][e.B]].value = min(ordEdgesList[ordEdges[e.a][e.B]].value, e.value);
+                ordEdgesList[ordEdges[e.A][e.B]].value = min(ordEdgesList[ordEdges[e.A][e.B]].value, e.value);
             }
         }
 
@@ -130,12 +138,14 @@ public:
             if(ucEdges[e.A][e.B] == kNaN) {
                 ucEdges[e.A][e.B] = ucEdgesList.size();
                 ucEdgesList.push_back(e);
+
+                ucNeighbours[e.A].push_back(Neighbour(e.B, 'u'));
             }
             // if edge is present keep the smaller value for it
             else {
-                assert(ucEdgesList[ucEdges[e.a][e.B]].C == e.C); // If this ever fails it means that we need to support multiple distinct uc edges between two nodes. 
+                assert(ucEdgesList[ucEdges[e.A][e.B]].C == e.C); // If this ever fails it means that we need to support multiple distinct uc edges between two nodes. 
                 // TODO(!!!!!!!)
-                ucEdgesList[ucEdges[e.a][e.B]].value = min(ucEdgesList[ucEdges[e.a][e.B]].value, e.value);
+                ucEdgesList[ucEdges[e.A][e.B]].value = min(ucEdgesList[ucEdges[e.A][e.B]].value, e.value);
             }
         }
 
@@ -145,10 +155,12 @@ public:
             if(lcEdges[e.A][e.B] == kNaN) {
                 lcEdges[e.A][e.B] = lcEdgesList.size();
                 lcEdgesList.push_back(e);
+                
+                lcNeighbours[e.A].push_back(Neighbour(e.B, 'l'));
             }
             // if edge is present keep the *larger* value for it
             else {
-                lcEdgesList[lcEdges[e.a][e.B]].value = max(lcEdgesList[lcEdges[e.a][e.B]].value, e.value);
+                lcEdgesList[lcEdges[e.A][e.B]].value = max(lcEdgesList[lcEdges[e.A][e.B]].value, e.value);
             }
         }
 
