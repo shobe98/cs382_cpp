@@ -3,6 +3,16 @@
 #include <string>
 using namespace std;
 
+struct Neighbour {
+    int ne; // the index of the neighbouring label -> one can get the edge from the edge matrix and edge vector. it's v messy for now :(
+    char c; // type of edge, o - ordinary, l - lower case, u - upper case
+    
+    Neighbour(int ne = 0, char c = 0) {
+        this->ne = ne;
+        this->c = c;
+    }
+};
+
 // this might become unused later on, ignore for now
 struct ContLink {
     int bound;
@@ -123,6 +133,8 @@ public:
             }
             // if edge is present keep the smaller value for it
             else {
+                assert(ucEdgesList[ucEdges[e.a][e.B]].C == e.C); // If this ever fails it means that we need to support multiple distinct uc edges between two nodes. 
+                // TODO(!!!!!!!)
                 ucEdgesList[ucEdges[e.a][e.B]].value = min(ucEdgesList[ucEdges[e.a][e.B]].value, e.value);
             }
         }
