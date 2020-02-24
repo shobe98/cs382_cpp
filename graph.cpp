@@ -1,6 +1,7 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
+#include <assert.h>
 using namespace std;
 
 struct Neighbour {
@@ -91,7 +92,7 @@ public:
     // to get the allmax edges iterate first through the ordinary edges and then through the uc edges, assigning high to each contlink
     vector<OrdEdge> ordEdgesList;
     vector<CaseEdge> ucEdgesList;
-    vector<CaseEdge> lcEdgeList;
+    vector<CaseEdge> lcEdgesList;
 
 
     // in these two vectors we save the edges we want to add to the graph. 
