@@ -80,6 +80,14 @@ void parse(STNU& G) {
 int main() {
     STNU* Graph = new STNU();
     parse(*Graph);
+    
+    if(is_dinamically_controllable(Graph)) {
+        cout << "DC" << endl;
+    }
+    else {
+        cout << "Negative cycle found!" << endl;
+    }
+    
     return 0;
 }
 
