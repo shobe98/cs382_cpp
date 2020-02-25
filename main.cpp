@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
-#include "algos.cpp" // include graph.cpp
+#include "algos.h" // include graph.cpp
+using namespace std;
 
 //takes in a STNU graph and parses file to initiate graph
 void parse(STNU& G) {
@@ -65,7 +66,7 @@ void parse(STNU& G) {
         data >> edge1 >> c.low >> c.high >> edge2;
         c.A = G.labelsToNum.find(edge1)->second;
         c.B = G.labelsToNum.find(edge2)->second;
-        cout << c.A << ":" << edge1 << " " << c.low << c.high  << c.B << ":"<<  edge2<<endl;
+        cout << c.A << ":" << edge1 << " " << c.low << " " << c.high << " " << c.B << ":"<<  edge2<<endl;
         G.addEdge(c);
         getline(data,str); 
     

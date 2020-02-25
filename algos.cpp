@@ -1,7 +1,9 @@
-#include "graph.cpp"
+#include "algos.h"
+
 #include <vector>
 #include <queue> // priority queue
-using namespace std;
+using std::vector;
+using std::min;
 
 vector<int> bellman_ford(STNU *stnu) {
     vector<int> distance(stnu->N, 0); // this will be the potential function as well
