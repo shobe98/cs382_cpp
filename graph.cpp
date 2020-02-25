@@ -22,9 +22,9 @@ void STNU::updateAllLazyEdges() {
         // if edge wasn't present add it to the list and keep track of the index in the matrix
         if(ordEdges[e.A][e.B] == kNaN) {
             ordEdges[e.A][e.B] = ordEdgesList.size();
-            ordEdgesList.push_back(e);
+            ordNeighbours[e.A].push_back(Neighbour(ordEdgesList.size(), 'o')); // ordinary edge 
             
-            ordNeighbours[e.A].push_back(Neighbour(e.B, 'o')); // ordinary edge 
+            ordEdgesList.push_back(e);
         }
         // if edge is present keep the smaller value for it
         else {
@@ -36,9 +36,9 @@ void STNU::updateAllLazyEdges() {
         // if edge wasn't present add it to the list and keep track of the index in the matrix
         if(ucEdges[e.A][e.B] == kNaN) {
             ucEdges[e.A][e.B] = ucEdgesList.size();
+            ucNeighbours[e.A].push_back(Neighbour(ucEdgesList.size(), 'u'));
+        
             ucEdgesList.push_back(e);
-
-            ucNeighbours[e.A].push_back(Neighbour(e.B, 'u'));
         }
         // if edge is present keep the smaller value for it
         else {
@@ -53,9 +53,9 @@ void STNU::updateAllLazyEdges() {
         // if edge wasn't present add it to the list and keep track of the index in the matrix
         if(lcEdges[e.A][e.B] == kNaN) {
             lcEdges[e.A][e.B] = lcEdgesList.size();
-            lcEdgesList.push_back(e);
+            lcNeighbours[e.A].push_back(Neighbour(lcEdgesList.size(), 'l')); // index is the same as in the matrix
             
-            lcNeighbours[e.A].push_back(Neighbour(e.B, 'l'));
+            lcEdgesList.push_back(e);
         }
         // if edge is present keep the *larger* value for it
         else {

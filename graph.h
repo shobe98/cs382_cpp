@@ -10,11 +10,11 @@ using std::unordered_map;
 using std::string;
 
 struct Neighbour {
-    int ne; // the index of the neighbouring label -> one can get the edge from the edge matrix and edge vector. it's v messy for now :(
+    int index; // the index of the neighbouring label -> one can get the edge from the edge vector. 
     char c; // type of edge, o - ordinary, l - lower case, u - upper case
     
-    Neighbour(int ne = 0, char c = 0) {
-        this->ne = ne;
+    Neighbour(int index = 0, char c = 0) {
+        this->index = index;
         this->c = c;
     }
 };
