@@ -77,6 +77,8 @@ public:
     int N, M, K;
     
 
+    bool has_negative_cycle = false;
+
     // mappings between labels and ints and back
     // TODO(abi): Can you implement a function that takes a vector of strings, copies it into numsToLabel and generates the labelsToNum map?
     unordered_map<string, int> labelsToNum;

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include "graph.cpp"
+#include "algos.cpp" // include graph.cpp
 
 //takes in a STNU graph and parses file to initiate graph
 void parse(STNU& G) {
