@@ -81,8 +81,10 @@ bool DCBackprop(int source) {
     in_rec_stack[source] = true;
 
     // change with N
-    vector<int> dist(kMaxLabels, kInf);
-    vector<bool> done_dijkstra(kMaxLabels, false);
+    vector<int> dist(N, kInf);
+    vector<char> type(N, 'o'); // default to ordinary edges
+    vector<int> label(N, 0);
+    vector<bool> done_dijkstra(N, false);
 
     dist[source] = 0;
 
