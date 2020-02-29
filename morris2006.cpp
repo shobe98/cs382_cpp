@@ -114,6 +114,7 @@ bool DCBackprop(int source) {
             // actually, it's probably not needed, it's just a constant optimisation but it doesn't change the complexity.
             // at most N^2 new edges are added (N per negative node), so the final complexity is still N^3 (or N^3log(N) with binary heap)
             InEdges[source].push_back(Edge(u, source, dist[u], 'o'));
+            cerr << "Added edge " << u << "->" << source << ' ' << dist[u] << endl;
             continue;
         }
 
@@ -157,6 +158,10 @@ bool DCBackprop(int source) {
     done[source] = true;
     in_rec_stack[source] = false;
 
+    // Andrei's addition to the algorithm. Comment for original behavior. 
+    if(dist[source] < 0) {
+        return false;
+    }
     return true;
 }
 
