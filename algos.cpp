@@ -104,7 +104,7 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu){
                                 dijkstra_queue[u.B]=true;
                             }
                             else {
-                                stnu->addEdge(CaseEdge(lc_Edge.A, lc_Edge.value+rpl, u.B));
+                                stnu->addEdge(CaseEdge(lc_Edge.A, u.B, lc_Edge.A, lc_Edge.value+rpl));
                             }
                         }
                     }
