@@ -55,15 +55,13 @@ vector<int> bellman_ford(STNU *stnu) {
 }
 
 void dijkstra(vector<int> f, STNU *stnu){
-    vector<OrdEdge> ordEdges;
-    vector<CaseEdge> ucEdges;
     vector<bool> dijkstra_done(stnu->N,false);
     vector<bool> dijkstra_queue(stnu->N,false);
     for (int j = 0; j < stnu->K; j++){
         CaseEdge C = stnu->lcEdgesList[j];
 
         //the priority queue takes in node X and priority (key)
-        priority_queue<NodeAndPrio> q; 
+        priority_queue<NodeAndPrio> q;
         q.push(NodeAndPrio(C.B,0));
         while (!q.empty()) {
             int TPnode = q.top().node;
@@ -79,47 +77,46 @@ void dijkstra(vector<int> f, STNU *stnu){
                 dijkstra_done[TPnode] = true;
                 int rpl = TPval + f[TPnode] - f[C.B];
                 if (rpl<0){
-                    ordEdges.push_back(OrdEdge(C.A, C.value+rpl, TPnode));
-                }
-
-                /*
-                   else {
-                //for each ordinary successor edge
-                for (auto &succ : stnu->lcNeighbours[C.B]){
-                if (succ.c = "o"){
-                //get OrdEdge o from the list of ordinary edges
-                OrdEdge o = stnu->ordEdgesList[succ.index];
-                int nn-delta = f[TP.node] + o.value + f[o.B];
-                if (!dijkstra_queue[o.B] || TP.priority + nn-delta < o.value){
-                //decrease the key value of osucc-->
-                //add it to the queue?
-                q.push(NodeAndPrio(o.B, TP.priority + nn-delta));
-                dijkstra_queue[o.B] = true;
-                }
-                }
-                else if (succ.c = "u"){
-                CaseEdge u = stnu->ucEdgesList[succ.index];
-                int nn-delta = f[Xnode] + u.value - f[u.B];
-                int nn-path = TP.priority + nn-delta;
-                int rpl = nn-path + f[u.B] - f[C.B];
-
-                int min = stnu->lcEdges[u.B][u.A];
-                if (rpl >= (min*-1)){
-                if (!dijkstra_queue[u.B] || nn-path < u.value){
-                q.push(NodeAndPrio(u.B, nn-path));
-                dijkstra_queue[u.B]=true;
+                    stnu->addEdge(OrdEdge(C.A, C.value+rpl, TPnode));
                 }
                 else {
-                ucEdges.push_back(new CaseEdge(C.A, C.value+rpl, u.B));
-                }
+                    //for each ordinary successor edge
+                    for (auto &succ : stnu->lcNeighbours[C.B]){
+                        if (succ.c = "o"){
+                            //get OrdEdge o from the list of ordinary edges
+                            OrdEdge o = stnu->ordEdgesList[succ.index];
+                            int nn_delta = f[TPnode] + o.value + f[o.B];
+                            if (!dijkstra_queue[o.B] || TPval + nn_delta < o.value){
+                                //decrease the key value of osucc-->
+                                //add it to the queue?
+                                q.push(NodeAndPrio(o.B, TPval + nn_delta));
+                                dijkstra_queue[o.B] = true;
+                            }
+                        }
+                        else if (succ.c = "u"){
+                            CaseEdge u = stnu->ucEdgesList[succ.index];
+                            int nn_delta = f[TPnode] + u.value - f[u.B];
+                            int nn_path = TPval + nn_delta;
+                            int rpl = nn_path + f[u.B] - f[C.B];
 
+                            int min = stnu->lcEdges[u.B][u.A];
+                            if (rpl >= (min*-1)){
+                                if (!dijkstra_queue[u.B] || nn_path < u.value){
+                                    q.push(NodeAndPrio(u.B, nn_path));
+                                    dijkstra_queue[u.B]=true;
+                                }
+                                else {
+                                    stnu->addEdge(CaseEdge(C.A, C.value+rpl, u.B));
+                                }
+                            }
+                        }
+                    }
                 }
-                }
-                }
-                }*/
             }
         }
     }
+    //add all edges to the graph
+    stnu->updateAllLazyEdges();
 }
 
 
@@ -133,8 +130,8 @@ bool is_dinamically_controllable(STNU *stnu) {
         }
 
         //for(auto &lc_edge : stnu->lcEdgesList) {
-            dijkstra(f, stnu);
-            // run dijkstra with the potential function
+        dijkstra(f, stnu);
+        // run dijkstra with the potential function
         //}
     }
 
