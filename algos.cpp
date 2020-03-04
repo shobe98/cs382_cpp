@@ -75,7 +75,7 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu){
             dijkstra_done[TPnode] = true;
             int rpl = TPval + f[TPnode] - f[lc_Edge.B];
             if (rpl<0){
-                stnu->addEdge(new OrdEdge(lc_Edge.A, lc_Edge.value+rpl, TPnode));
+                stnu->addEdge(OrdEdge(lc_Edge.A, lc_Edge.value+rpl, TPnode));
             }
             else {
                 //for each ordinary successor edge
@@ -104,7 +104,7 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu){
                                 dijkstra_queue[u.B]=true;
                             }
                             else {
-                                stnu->addEdge(new CaseEdge(lc_Edge.A, lc_Edge.value+rpl, u.B));
+                                stnu->addEdge(CaseEdge(lc_Edge.A, lc_Edge.value+rpl, u.B));
                             }
                         }
                     }
