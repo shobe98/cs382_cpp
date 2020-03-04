@@ -1,9 +1,30 @@
-#include "algos.h"
-#include "morris2006.cpp"
+#include "algos.h" 
 #include <vector>
+#include <algorithm>
 #include <queue> // priority queue
+#include <cassert>
+#include <unordered_map>
+#include <iostream>
+#include <fstream>
+using namespace std;
 using std::vector;
 using std::min;
+
+
+struct NodeAndPrio {
+    int node;
+    /// we very likeley need labels 
+    int prio;
+
+    NodeAndPrio(int node = 0, int prio = 0) {
+        this->node = node;
+        this->prio = prio;
+    }
+
+    bool operator < (const NodeAndPrio &other) const {
+        return prio > other.prio; // we want a min heap, thus the sign here needs to be 'greater'. (prio queue defaults to max heap)
+    }
+};
 
 vector<int> bellman_ford(STNU *stnu) {
     vector<int> distance(stnu->N, 0); // this will be the potential function as well
