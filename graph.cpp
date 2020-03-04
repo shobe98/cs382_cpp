@@ -15,6 +15,10 @@ void STNU::addEdge(const ContLinkEdge& e) {
     lazyLcEdges.push_back(CaseEdge(e.A, e.B, e.B, e.low));
 }
 
+void STNU::addEdge(const CaseEdge& e) {
+    // It must be an upper case edge
+    lazyUcEdges.push_back(e);
+}
 
 void STNU::updateAllLazyEdges() {
     // TODO(somebody): refactor this duplicated code in a function call
