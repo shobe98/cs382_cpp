@@ -132,6 +132,13 @@ bool is_dinamically_controllable(STNU *stnu) {
         stnu->updateAllLazyEdges();
     }
 
+    // Last round
+    bellman_ford(stnu);
+
+    if(stnu->has_negative_cycle) {
+        return false;
+    }
+
     // if no negative cycle is found
     return true;
 }
