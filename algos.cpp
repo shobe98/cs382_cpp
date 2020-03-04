@@ -110,7 +110,7 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu){
                     }
                 }
                 else { // rpl < -min < 0
-                    stnu->addEdge(CaseEdge(lc_Edge.A, u.B, lc_Edge.B, lc_Edge.value+rpl));
+                    stnu->addEdge(CaseEdge(lc_Edge.A, u.B, lower_case_edge_aa_cc.C, lc_Edge.value+rpl));
                 }
             }
         }
