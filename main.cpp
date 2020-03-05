@@ -66,7 +66,7 @@ int main() {
     STNU* Graph = new STNU();
     parse(*Graph);
     
-    if(is_dinamically_controllable(Graph)) {
+    if(is_dynamically_controllable(Graph)) {
         cout << "DC" << endl;
     }
     else {
