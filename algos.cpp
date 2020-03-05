@@ -87,7 +87,7 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu){
         dijkstra_done[TPnode] = true;
 
         int rpl = TPval + f[TPnode] - f[lc_Edge.B];
-        if (rpl<0){
+        if (rpl<=0){
             stnu->addEdge(OrdEdge(lc_Edge.A, lc_Edge.value+rpl, TPnode));
             continue; 
         }
