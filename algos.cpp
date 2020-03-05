@@ -69,7 +69,6 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu){
     while (!q.empty()) {
         int TPnode = q.top().node;
         int TPval = q.top().prio;
-        //NodeAndPrio TP = q.pop();
         //if dijkstra_done[TP.node] = true, TP was processed previously,
         //so we pop off the node and continue without doing anything to it 
         if (dijkstra_done[TPnode]){
@@ -84,8 +83,9 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu){
             continue; // did he call this a moat edge?
         }
 
-        //for each ordinary successor edge
+        //for each successor edge
         for (auto &succ : stnu->lcNeighbours[lc_Edge.B]) {
+            //if ordinary edge:
             if (succ.c == 'o'){
                 //get OrdEdge o from the list of ordinary edges
                 OrdEdge o = stnu->ordEdgesList[succ.index];
@@ -95,6 +95,7 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu){
                     q.push(NodeAndPrio(o.B, TPval + nn_delta));
                 }
             }
+            //if UC edge:
             else if (succ.c == 'u'){
                 CaseEdge u = stnu->ucEdgesList[succ.index];
                 int nn_delta = f[TPnode] + u.value - f[u.B];
