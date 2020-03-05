@@ -69,7 +69,6 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu){
     while (!q.empty()) {
         int TPnode = q.top().node;
         int TPval = q.top().prio;
-        //NodeAndPrio TP = q.pop();
         //if dijkstra_done[TP.node] = true, TP was processed previously,
         //so we pop off the node and continue without doing anything to it 
         if (dijkstra_done[TPnode]){
@@ -83,9 +82,10 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu){
             stnu->addEdge(OrdEdge(lc_Edge.A, lc_Edge.value+rpl, TPnode));
             continue; // did he call this a moat edge?
         }
-        
-        //for each ordinary successor edge
+
+        //for each successor edge
         for (auto &succ : stnu->lcNeighbours[lc_Edge.B]) {
+            //if ordinary edge:
             if (succ.c == 'o'){
                 //get OrdEdge o from the list of ordinary edges
                 OrdEdge o = stnu->ordEdgesList[succ.index];
@@ -95,22 +95,25 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu){
                     q.push(NodeAndPrio(o.B, TPval + nn_delta));
                 }
             }
-            /*else if (succ.c == 'u'){
-              CaseEdge u = stnu->ucEdgesList[succ.index];
-              int nn_delta = f[TPnode] + u.value - f[u.B];
-              int nn_path = TPval + nn_delta;
-              int rpl = nn_path + f[u.B] - f[lc_Edge.B];
-
-              int min = stnu->lcEdges[u.B][u.A];
-              if (rpl >= (min*-1)){
-              if (nn_path < u.value){
-              q.push(NodeAndPrio(u.B, nn_path));
-              }
-              else {
-              stnu->addEdge(CaseEdge(lc_Edge.A, u.B, lc_Edge.A, lc_Edge.value+rpl));
-              }
-              }
-              }*/
+            //if UC edge:
+            else if (succ.c == 'u'){
+                CaseEdge u = stnu->ucEdgesList[succ.index];
+                int nn_delta = f[TPnode] + u.value - f[u.B];
+                int nn_path = TPval + nn_delta;
+                int rpl = nn_path + f[u.B] - f[lc_Edge.B];
+                
+                auto lower_case_edge_aa_cc = stnu->lcEdgesList[stnu->lcEdges[u.B][u.C]];
+                int minv = lower_case_edge_aa_cc.value;
+                if (rpl >= -minv)
+                {
+                    if (nn_path < dist[u.B]) {
+                        q.push(NodeAndPrio(u.B, nn_path));
+                    }
+                }
+                else { // rpl < -min < 0
+                    stnu->addEdge(CaseEdge(lc_Edge.A, u.B, lower_case_edge_aa_cc.C, lc_Edge.value+rpl));
+                }
+            }
         }
     }
 }
