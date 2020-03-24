@@ -122,8 +122,7 @@ public:
 
     void addEdge(const OrdEdge& e);    
     void addEdge(const ContLinkEdge& e);
-    // TODO(astanciu): rename to addUpperCaseEdge 
-    void addEdge(const CaseEdge& e); // adds an upper case edge
+    void addUpperCaseEdge(const CaseEdge& e); 
 
     void updateAllLazyEdges();
 };
