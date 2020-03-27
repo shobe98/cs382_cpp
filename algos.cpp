@@ -59,7 +59,8 @@ vector<int> bellman_ford(STNU *stnu) {
 }
 
 void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu) {
-
+  cerr << "Dijkstra from " << lc_Edge.B << " with lc edge from" << lc_Edge.A
+       << ":" << lc_Edge.value << endl;
   // The minimum distances from C (lc_edge.B) to all the nodes
   vector<int> dist(stnu->N, kInf);
   // Whether we're done processing a node or not.
@@ -80,6 +81,12 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu) {
   while (!q.empty()) {
     int TPnode = q.top().node;
     int TPval = q.top().prio;
+
+    for (auto it : dist) {
+      cerr << it << ' ';
+    }
+    cerr << endl;
+    cerr << endl << "Expanding node " << TPnode << endl;
     // if dijkstra_done[TP.node] = true, TP was processed previously,
     // so we pop off the node and continue without doing anything to it
     if (dijkstra_done[TPnode]) {
@@ -89,7 +96,7 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu) {
     dijkstra_done[TPnode] = true;
 
     int rpl = TPval + f[TPnode] - f[lc_Edge.B];
-    if (rpl <= 0) {
+    if (rpl <= 0 && TPnode != lc_Edge.B) {
       stnu->addEdge(OrdEdge(lc_Edge.A, lc_Edge.value + rpl, TPnode));
       continue;
     }
@@ -145,6 +152,11 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu) {
       }
     }
   }
+
+  for (auto it : dist) {
+    cerr << it << ' ';
+  }
+  cerr << endl;
 }
 
 // side effect: modifies the graph by adding new edges
