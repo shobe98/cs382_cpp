@@ -28,7 +28,7 @@ struct NodeAndPrio {
   }
 };
 
-/* Runs the unmodified bellam ford algorithm on the STNU.
+/* Runs the unmodified bellman ford algorithm on the STNU.
  * Input: Any STNU
  * Output: a potential function
  * Side effect: Will set the has_negative_cycle flag in the STNU if one is
@@ -64,6 +64,13 @@ vector<int> bellman_ford(STNU *stnu) {
   return distance;
 }
 
+/* Contract: dijkstra(lc_Edge, f, *stnu) -> void
+ * Input: CaseEdge lc_Edge is the starting lower case edge, 
+ *        vector<int> f is the potential function f
+ *        STNU *stnu is any STNU graph
+ * Starts from lower case edge lc_Edge and traverses STNU graph
+ * until the function is able to reduce away the lower case edge 
+ */
 void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu) {
   cerr << "Dijkstra from " << lc_Edge.B << " with lc edge from" << lc_Edge.A
        << ":" << lc_Edge.value << endl;
@@ -165,7 +172,13 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu) {
   cerr << endl;
 }
 
-// side effect: modifies the graph by adding new edges
+/* Contract: is_dynamically_controllable(*stnu) -> bool
+ * Input: STNU *stnu is any STNU graph
+ * Returns whether the given graph *stnu is dynamically
+ * controllable or not by running bellman-ford and 
+ * dijkstra.
+ * side effect: modifies the graph by adding new edges
+ */
 bool is_dynamically_controllable(STNU *stnu) {
   for (int rep = 1; rep <= stnu->K; ++rep) {
     vector<int> f = bellman_ford(stnu); // potential function

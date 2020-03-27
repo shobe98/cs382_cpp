@@ -1,9 +1,18 @@
+/* 
+main.cpp
+Abigail Ren, Andrei Stanciu
+*/
+
 #include "algos.h" // include graph.cpp
 #include <fstream>
 #include <iostream>
 using namespace std;
 
-// takes in a STNU graph and parses file to initiate graph
+/* Contract: *parse() -> STNU
+ * Output:   returns an STNU graph
+ * Parses a file to obtain data
+ * and initiates a new STNU graph
+ */
 STNU *parse() {
   string str;
   getline(cin, str);
@@ -15,14 +24,17 @@ STNU *parse() {
   getline(cin, str);
   getline(cin, str);
 
-  // get N, M, and K
+  // get n
   int n;
   cin >> n;
+  
+  // instantiate STNU *G as new STNU with n edges
   STNU *G = new STNU(n);
 
   getline(cin, str);
   getline(cin, str);
-
+  
+  //Get M and K and save to STNU graph G
   cin >> G->M;
 
   getline(cin, str);
@@ -46,6 +58,7 @@ STNU *parse() {
   getline(cin, str);
   getline(cin, str);
 
+  // reads in Ord. Edges
   for (int i = 0; i < G->M; i++) {
     OrdEdge o;
     string edge1, edge2;
@@ -70,11 +83,17 @@ STNU *parse() {
     getline(cin, str);
   }
 
+  //updates buffered edges and adds them to STNU graph
   G->updateAllBufferedEdges();
 
   return G;
 }
 
+/* Contract: main()
+ * Initiates graph by parsing file
+ * Determines if the graph is dynamically_controllable
+ * and prints result.
+ */
 int main() {
   STNU *Graph = parse();
 
