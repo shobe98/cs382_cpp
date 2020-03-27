@@ -28,6 +28,12 @@ struct NodeAndPrio {
   }
 };
 
+/* Runs the unmodified bellam ford algorithm on the STNU.
+ * Input: Any STNU
+ * Output: a potential function
+ * Side effect: Will set the has_negative_cycle flag in the STNU if one is
+ * found.
+ */
 vector<int> bellman_ford(STNU *stnu) {
   vector<int> distance(stnu->N,
                        0); // this will be the potential function as well
