@@ -65,11 +65,11 @@ vector<int> bellman_ford(STNU *stnu) {
 }
 
 /* Contract: dijkstra(lc_Edge, f, *stnu) -> void
- * Input: CaseEdge lc_Edge is the starting lower case edge, 
+ * Input: CaseEdge lc_Edge is the starting lower case edge,
  *        vector<int> f is the potential function f
  *        STNU *stnu is any STNU graph
  * Starts from lower case edge lc_Edge and traverses STNU graph
- * until the function is able to reduce away the lower case edge 
+ * until the function is able to reduce away the lower case edge
  */
 void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu) {
   cerr << "Dijkstra from " << lc_Edge.B << " with lc edge from" << lc_Edge.A
@@ -109,7 +109,7 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu) {
     dijkstra_done[TPnode] = true;
 
     int rpl = TPval + f[TPnode] - f[lc_Edge.B];
-    if (rpl <= 0 && TPnode != lc_Edge.B) {
+    if (rpl < 0) {
       stnu->addEdge(OrdEdge(lc_Edge.A, lc_Edge.value + rpl, TPnode));
       continue;
     }
@@ -175,7 +175,7 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu) {
 /* Contract: is_dynamically_controllable(*stnu) -> bool
  * Input: STNU *stnu is any STNU graph
  * Returns whether the given graph *stnu is dynamically
- * controllable or not by running bellman-ford and 
+ * controllable or not by running bellman-ford and
  * dijkstra.
  * side effect: modifies the graph by adding new edges
  */
