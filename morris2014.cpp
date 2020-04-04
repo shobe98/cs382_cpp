@@ -7,6 +7,8 @@
 #include <vector>
 using namespace std;
 
+static int DEBUG = 0;
+
 const int kMaxLabels = 1000;
 const int kNaN = -1; // -1 for now
 const int kInf = 0x3f3f3f3f;
@@ -48,11 +50,6 @@ struct Edge {
   // Edge(0, 1, 100, 'l', 1) // lower case edge towards 1, the label on it is 1
 };
 
-bool unsuitable(const Edge &e, int u, int source) {
-  // idk what unsuitable edge means
-  return false; // all edges are suitable for now
-}
-
 // STNU representation
 int N, M, K;
 
@@ -64,6 +61,19 @@ vector<string> numsToLabel;
 bool is_negative_node[kMaxLabels];
 bool in_rec_stack[kMaxLabels];
 bool done[kMaxLabels];
+
+bool unsuitable(const Edge &e, int u, int source) {
+  // If the starting node was a special node (i.e. a node that has exactly one
+  // ingoing UC edge)
+  if (InEdges[source].size() == 1 && InEdges[source][0].type == 'u') {
+    if (e.type == 'l') {
+      // Unsuitable if same labels.
+      return e.C == InEdges[source][0].C;
+    }
+  }
+  // Any other edge is suitable. Yay!
+  return false; // all edges are suitable for now
+}
 
 // for comodity we don't edit nodes int the heap, but keep track of wether we're
 // done with a node or not, and thus w ecan have a node appear multiple times in
@@ -78,7 +88,7 @@ bool DCBackprop(int source) {
     return true;
   }
 
-  cerr << "Negative node: " << source << endl;
+  DEBUG && (cerr << "Negative node: " << source << endl);
 
   in_rec_stack[source] = true;
 
@@ -120,6 +130,13 @@ bool DCBackprop(int source) {
       // a constant optimisation but it doesn't change the complexity. at most
       // N^2 new edges are added (N per negative node), so the final complexity
       // is still N^3 (or N^3log(N) with binary heap)
+      //
+      // As mentioned in the paper, we only add ordinary edges "by virtue of
+      // label removal rule" (where applicable).
+      //
+      // TODO(astanciu): The label removal rule only works if the label we
+      // started with is different than u. Should be checked, righ? @Prof
+      // Hunsberger ?
       InEdges[source].push_back(Edge(u, source, dist[u], 'o'));
       cerr << "Added edge " << u << "->" << source << ' ' << dist[u] << endl;
       continue;
@@ -137,6 +154,8 @@ bool DCBackprop(int source) {
       }
     }
 
+    // WARN: If an edge gets added inside this forloop, iterators can get
+    // invalidated. Safe for now.
     for (auto &edge : InEdges[u]) {
       if (edge.value < 0) {
         continue;
@@ -155,21 +174,26 @@ bool DCBackprop(int source) {
     }
   }
 
-  cerr << source << "'s propagation done" << endl;
+  DEBUG &&cerr << source << "'s propagation done" << endl;
   for (int x = 0; x < N; ++x) {
-    cerr << dist[x] << " ";
+    DEBUG &&cerr << dist[x] << " ";
   }
-  cerr << endl;
+  DEBUG &&cerr << endl;
 
   done[source] = true;
   in_rec_stack[source] = false;
 
-  // Andrei's addition to the algorithm. Comment for original behavior.
+  // Andrei's addition to the algorithm.
+  // It is mentioned in the paper but nor present in the pseudocode.
   if (dist[source] < 0) {
     return false;
   }
   return true;
 }
+
+// TODO(anybody): According to section 3 (right before 3.1) the STNU should be
+// in normal form.
+// TODO(anybody): We should also have a function that transforms the graph.
 
 // Abi's code
 void parse() {
@@ -242,11 +266,28 @@ void parse() {
     InEdges[A].push_back(Edge(B, A, -high, 'u', B));
     InEdges[B].push_back(Edge(A, B, low, 'l', B));
 
+    // TODO(andrei): Implement the transformation.
+    // As soon as we implement the transformation of the graph this will have to
+    // go somewhere else. Basically, since for every negative node we either
+    // have one negative UC edge -> where we need to keep track of its label or
+    // only oridnary edges, some negative -> where we don't have any label. This
+    // map keeps track of those nodes that have a label. Maps node index to UC
+    // label (also an index).
+
     getline(cin, str);
   }
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+  if (argc == 2) {
+    if (string(argv[1]) == "--verbose") {
+      DEBUG = 1;
+    } else {
+      cout << "Usage: ./morris2014  [--verbose]" << endl;
+      exit(1);
+    }
+  }
+
   parse();
 
   for (int i = 0; i < N; ++i) {
