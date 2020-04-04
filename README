@@ -2,4 +2,10 @@ Andrei Stanciu
 Abigail Ren
 CMPU 382 - Morris 2006 Description
 
+To run code, type the following in to the command line:
+  1. make main
+  2. ./main < tests/"name of example text file"
+For example: ./main < tests/magic-loop-3.stnu
+
 	Our code implementing the Morris 2006 algorithm is made up of five parts: graph.h, graph.cpp, algos.h, algos.cpp, and main.cpp. In graph.h, we defined the structures and objects used by the algorithm to store data, with implementations of OrdEdges and CaseEdges, and the definition of the STNU class, where we implemented the vectors and matrices where we store these edges. The file graph.cpp defines the functions in the STNU class that are used to add edges to the vectors and matrix after parsing and creating new edges during the algorithm. In algos.h, the file graph.h is included so we can access the data structures defined, and we declare the functions for bellman_ford and is_dynamically_controllable. In algos.cpp, we define the above functions and add an implementation of dijkstra. The function is_dynamically_controllable calls bellman_ford and dijkstra to check if the STNU given is dynamically controllable. Finally, in main.cpp, we include algos.h and define the function parse that reads the input data files and stores the data in the data structures we defined in graph.h. The main function then creates an empty STNU, calls the parse function, and then calls is_dynamically_controllable to determine if the STNU is dynamically controllable, returning "DC" if true, and "Negative cycle found!" if not.
+
