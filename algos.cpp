@@ -73,7 +73,9 @@ vector<int> bellman_ford(STNU *stnu) {
  */
 void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu) {
   cerr << "Dijkstra from " << stnu->numsToLabel[lc_Edge.B]
-       << " with lc edge from" << lc_Edge.A << ":" << lc_Edge.value << endl;
+       << " with lc edge from " << stnu->numsToLabel[lc_Edge.A] << " to "
+       << stnu->numsToLabel[lc_Edge.B] << " with label "
+       << stnu->numsToLabel[lc_Edge.C] << ":" << lc_Edge.value << endl;
   // The minimum distances from C (lc_edge.B) to all the nodes
   vector<int> dist(stnu->N, kInf);
   // Whether we're done processing a node or not.
