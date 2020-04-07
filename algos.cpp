@@ -144,7 +144,7 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu) {
 
       // The lower case that came together (in a contingent link) with the
       // upper case edge ucedge
-      auto lower_case_edge_aa_cc =
+      const auto &lower_case_edge_aa_cc =
           stnu->lcEdgesList[stnu->lcEdges[ucedge.B][ucedge.C]];
       int minv = lower_case_edge_aa_cc.value;
 
@@ -160,7 +160,7 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu) {
       // Shouldn't we try to apply the cross case rule even if the label
       // removal rule works?
       //
-      else { // rpl < -min < 0
+      else if (lower_case_edge_aa_cc.C != lc_Edge.C) { // rpl < -min < 0
         // The cross-case rule. lc_edge + (lc_edge.B ~~~~dijkstra path~~~~~>
         // ucedge.A ---(C:value)---> ucedge.B)
         stnu->addUpperCaseEdge(CaseEdge(
