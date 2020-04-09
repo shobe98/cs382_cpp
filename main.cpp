@@ -59,6 +59,8 @@ STNU *parse() {
   getline(cin, str);
 
   // reads in Ord. Edges
+
+  // Needs fixing: cannot parse negative values
   for (int i = 0; i < G->M; i++) {
     OrdEdge o;
     string edge1, edge2;
