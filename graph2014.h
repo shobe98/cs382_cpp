@@ -11,7 +11,8 @@ using std::unordered_map;
 using std::vector;
 
 struct Neighbour {
-  int index; // the index of the neighbouring label -> one can get the edge from
+//edge  
+int index; // the index of the neighbouring label -> one can get the edge from
              // the edge vector.
   char c;    // type of edge, o - ordinary, l - lower case, u - upper case
 
@@ -53,7 +54,6 @@ public:
 
   bool has_negative_cycle = false;
   
-  vector<Edge> InEdges[kMaxLabels];
   // mappings between labels and ints and back
   unordered_map<string, int> labelsToNum;
   vector<string> numsToLabel;
@@ -61,24 +61,14 @@ public:
   vector<bool> is_negative_node[kMaxLabels];
   vector<bool> in_rec_stack[kMaxLabels];
   vector<bool> done[kMaxLabels];
+  
   // These  matrices are necessary to make sure we don't save duplicated edges
-  // (that would fuck up the complexity - say if an edge gets updated n times,
-  // we would otherwise have ncopies of it) I know this makes the code slightly
-  // messier, but should be fine for now index to the edge in the vector of
-  // edges or -1
-  vector<vector<int>> ordEdges;
-  vector<vector<int>> ucEdges;
-  vector<vector<int>> lcEdges;
+  // saves the index to the edge in the vector of edges or -1
+  vector<vector<int>> indexEdges;
 
-  // to get the allmax edges iterate first through the ordinary edges and then
-  // through the uc edges, assigning high to each contlink
-  vector<OrdEdge> ordEdgesList;
-  vector<CaseEdge> ucEdgesList;
-  vector<CaseEdge> lcEdgesList;
-
-  // in these two vectors we save the edges we want to add to the graph.
-  vector<OrdEdge> bufferOrdEdges;
-  vector<CaseEdge> bufferUcEdges;
+  // keeps track of the incoming edges in the graph
+  // for InEdge[A][B], the edge saved is the edge going from B into A
+  vector<vector<Edge>> InEdges;
 
   // Lists of neighbours -> basically the matrices prof Hunsberger showed us.
   vector<vector<Neighbour>> ordNeighbours;
@@ -86,20 +76,17 @@ public:
 
   STNU(int n) {
     this->N = n;
-
-    ordEdges = vector<vector<int>>(n, vector<int>(n, kNaN));
-    ucEdges = vector<vector<int>>(n, vector<int>(n, kNaN));
-    lcEdges = vector<vector<int>>(n, vector<int>(n, kNaN));
+    
+    InEdges = vector<vector<Edge>>(n, vector<Edge>());
+    indexEdges = vector<vector<int>>(n, vector<int>(n, kNaN));
 
     ordNeighbours = vector<vector<Neighbour>>(n, vector<Neighbour>());
     ucNeighbours = vector<vector<Neighbour>>(n, vector<Neighbour>());
   }
 
-  void addEdge(const OrdEdge &e);
-  void addEdge(const ContLinkEdge &e);
-  void addUpperCaseEdge(const CaseEdge &e);
+  void addEdge(const Edge &e);
 
   void updateAllBufferedEdges();
 };
 
-#endif // _GRAPH_H_
+#endif // _GRAPH_H_:
