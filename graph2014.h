@@ -1,4 +1,4 @@
-#ifndef _GRAPHi2014_H_
+#ifndef _GRAPH2014_H_
 #define _GRAPH2014_H_
 
 #include <cassert>
