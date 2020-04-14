@@ -64,6 +64,10 @@ vector<int> bellman_ford(STNU *stnu) {
   return distance;
 }
 
+int getRPL(int x, int y, int dijkstraDistance, vector<int> &f) {
+  return dijkstraDistance + f[y] - f[x];
+}
+
 /* Contract: dijkstra(lc_Edge, f, *stnu) -> void
  * Input: CaseEdge lc_Edge is the starting lower case edge,
  *        vector<int> f is the potential function f
@@ -71,9 +75,11 @@ vector<int> bellman_ford(STNU *stnu) {
  * Starts from lower case edge lc_Edge and traverses STNU graph
  * until the function is able to reduce away the lower case edge
  */
-void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu) {
-  cerr << "Dijkstra from " << lc_Edge.B << " with lc edge from" << lc_Edge.A
-       << ":" << lc_Edge.value << endl;
+void dijkstra(CaseEdge lc_Edge, vector<int> &f, STNU *stnu) {
+  cerr << "Dijkstra from " << stnu->numsToLabel[lc_Edge.B]
+       << " with lc edge from " << stnu->numsToLabel[lc_Edge.A] << " to "
+       << stnu->numsToLabel[lc_Edge.B] << " with label "
+       << stnu->numsToLabel[lc_Edge.C] << ":" << lc_Edge.value << endl;
   // The minimum distances from C (lc_edge.B) to all the nodes
   vector<int> dist(stnu->N, kInf);
   // Whether we're done processing a node or not.
@@ -95,11 +101,6 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu) {
     int TPnode = q.top().node;
     int TPval = q.top().prio;
 
-    for (auto it : dist) {
-      cerr << it << ' ';
-    }
-    cerr << endl;
-    cerr << endl << "Expanding node " << TPnode << endl;
     // if dijkstra_done[TP.node] = true, TP was processed previously,
     // so we pop off the node and continue without doing anything to it
     if (dijkstra_done[TPnode]) {
@@ -108,7 +109,18 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu) {
     }
     dijkstra_done[TPnode] = true;
 
+    cerr << endl << "Expanding node " << stnu->numsToLabel[TPnode] << endl;
+    cerr << "Before: ";
+    for (int i = 0; i < stnu->N; ++i) {
+      if (dist[i] != kInf) {
+        cerr << stnu->numsToLabel[i] << ":" << getRPL(lc_Edge.B, i, dist[i], f)
+             << ' ';
+      }
+    }
+    cerr << endl;
+
     int rpl = TPval + f[TPnode] - f[lc_Edge.B];
+    assert(rpl == getRPL(lc_Edge.B, TPnode, TPval, f));
     if (rpl < 0) {
       stnu->addEdge(OrdEdge(lc_Edge.A, lc_Edge.value + rpl, TPnode));
       continue;
@@ -116,7 +128,7 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu) {
 
     // for each successor edge
     // ordinary
-    for (auto &succ : stnu->ordNeighbours[lc_Edge.B]) {
+    for (auto &succ : stnu->ordNeighbours[TPnode]) {
       // get OrdEdge o from the list of ordinary edges
       OrdEdge orde = stnu->ordEdgesList[succ.index];
       // non negative edge value
@@ -128,7 +140,7 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu) {
       }
     }
     // uc
-    for (auto &succ : stnu->ucNeighbours[lc_Edge.B]) {
+    for (auto &succ : stnu->ucNeighbours[TPnode]) {
       CaseEdge ucedge = stnu->ucEdgesList[succ.index];
       int nn_delta = f[TPnode] + ucedge.value - f[ucedge.B];
 
@@ -141,7 +153,7 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu) {
 
       // The lower case that came together (in a contingent link) with the
       // upper case edge ucedge
-      auto lower_case_edge_aa_cc =
+      const auto &lower_case_edge_aa_cc =
           stnu->lcEdgesList[stnu->lcEdges[ucedge.B][ucedge.C]];
       int minv = lower_case_edge_aa_cc.value;
 
@@ -157,17 +169,29 @@ void dijkstra(CaseEdge lc_Edge, vector<int> f, STNU *stnu) {
       // Shouldn't we try to apply the cross case rule even if the label
       // removal rule works?
       //
-      else { // rpl < -min < 0
+      else if (lower_case_edge_aa_cc.C != lc_Edge.C) { // rpl < -min < 0
         // The cross-case rule. lc_edge + (lc_edge.B ~~~~dijkstra path~~~~~>
         // ucedge.A ---(C:value)---> ucedge.B)
         stnu->addUpperCaseEdge(CaseEdge(
             lc_Edge.A, ucedge.B, lower_case_edge_aa_cc.C, lc_Edge.value + rpl));
       }
     }
+    cerr << "After: ";
+    for (int i = 0; i < stnu->N; ++i) {
+      if (dist[i] != kInf) {
+        cerr << stnu->numsToLabel[i] << ":" << getRPL(lc_Edge.B, i, dist[i], f)
+             << ' ';
+      }
+    }
+    cerr << endl;
   }
 
-  for (auto it : dist) {
-    cerr << it << ' ';
+  cerr << "\nThis is the distance vector at the end of dijkstra: " << endl;
+  for (int i = 0; i < stnu->N; ++i) {
+    if (dist[i] != kInf) {
+      cerr << stnu->numsToLabel[i] << ":" << getRPL(lc_Edge.B, i, dist[i], f)
+           << ' ';
+    }
   }
   cerr << endl;
 }

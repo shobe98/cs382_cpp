@@ -59,12 +59,14 @@ STNU *parse() {
   getline(cin, str);
 
   // reads in Ord. Edges
+
   for (int i = 0; i < G->M; i++) {
     OrdEdge o;
     string edge1, edge2;
     // reads in string names for edges and value
     cin >> edge1 >> o.value >> edge2;
     // finds index for each edge and saves to o
+    
     o.A = G->labelsToNum.find(edge1)->second;
     o.B = G->labelsToNum.find(edge2)->second;
     G->addEdge(o);

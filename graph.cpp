@@ -17,8 +17,8 @@ using std::vector;
 void STNU::addEdge(const OrdEdge &e) {
   bufferOrdEdges.push_back(e);
 
-  DEBUG && (cerr << "Added ord edge " << e.A << ' ' << e.B << ' ' << e.value
-                 << endl);
+  DEBUG && (cerr << "Added ord edge " << numsToLabel[e.A] << ' '
+                 << numsToLabel[e.B] << ' ' << e.value << endl);
 }
 
 /* Input: A ContLinkEdge
@@ -46,8 +46,9 @@ void STNU::addEdge(const ContLinkEdge &e) {
  */
 void STNU::addUpperCaseEdge(const CaseEdge &e) {
   bufferUcEdges.push_back(e);
-  DEBUG && (cerr << "Added UC edge " << e.A << ' ' << e.B << ' ' << e.C << ':'
-                 << e.value << endl);
+  DEBUG && (cerr << "Added UC edge " << numsToLabel[e.A] << " to "
+                 << numsToLabel[e.B] << " with label " << numsToLabel[e.C]
+                 << ':' << e.value << endl);
 }
 
 /* Effect: Clears all the buffer edges while adding (or updating) the edges to
