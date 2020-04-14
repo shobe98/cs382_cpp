@@ -7,6 +7,8 @@
 #include <vector>
 using namespace std;
 
+#define DEBUG 1
+
 const int kMaxLabels = 1000;
 const int kNaN = -1; // -1 for now
 const int kInf = 0x3f3f3f3f;
@@ -48,9 +50,12 @@ struct Edge {
   // Edge(0, 1, 100, 'l', 1) // lower case edge towards 1, the label on it is 1
 };
 
-bool unsuitable(const Edge &e, int u, int source) {
-  // idk what unsuitable edge means
-  return false; // all edges are suitable for now
+// Returns true if edge is unsuitable
+inline bool unsuitable(const Edge &e, const int &starting_label) {
+  // For now an edge is unsuitable iff it is a lower case edge and it  has the
+  // same label as the initial uc edge
+  // I'll leave this as a function in case we need to add anithing else here
+  return e.type != 'u' && starting_label == e.C;
 }
 
 // STNU representation
@@ -78,7 +83,7 @@ bool DCBackprop(int source) {
     return true;
   }
 
-  cerr << "Negative node: " << source << endl;
+  cerr << "Currently running DCBackprop from " << numsToLabel[source] << endl;
 
   in_rec_stack[source] = true;
 
@@ -88,14 +93,23 @@ bool DCBackprop(int source) {
   vector<int> label(N, 0);
   vector<bool> done_dijkstra(N, false);
 
+  int starting_label = -1;
+
   dist[source] = 0;
 
   priority_queue<NodeAndPrio> Q;
 
   for (auto &edge : InEdges[source]) {
-    dist[edge.A] = edge.value; // maybe labels
+    // Only initialize the preds of the negative node connected by negative
+    // edges
+    if (edge.value < 0) {
+      dist[edge.A] = edge.value;
+      Q.push(NodeAndPrio(edge.A, dist[edge.A]));
 
-    Q.push(NodeAndPrio(edge.A, dist[edge.A]));
+      if (edge.type == 'u') {
+        starting_label = edge.C;
+      }
+    }
   }
   done_dijkstra[source] = true;
 
@@ -112,6 +126,8 @@ bool DCBackprop(int source) {
 
     // done popping
 
+    cerr << endl << "Expanding node " << numsToLabel[u] << endl;
+
     if (dist[u] >= 0) {
       // add new edge u->source
 
@@ -121,14 +137,17 @@ bool DCBackprop(int source) {
       // N^2 new edges are added (N per negative node), so the final complexity
       // is still N^3 (or N^3log(N) with binary heap)
       InEdges[source].push_back(Edge(u, source, dist[u], 'o'));
-      cerr << "Added edge " << u << "->" << source << ' ' << dist[u] << endl;
+      DEBUG && (cerr << "Added ord edge " << numsToLabel[u] << ' '
+                     << numsToLabel[source] << ' ' << dist[u] << endl);
       continue;
     }
 
     if (is_negative_node[u]) {
-      cerr << "about to enter recursion in " << u << endl;
-      for (int x = 0; x < N; ++x) {
-        cerr << dist[x] << " ";
+      cerr << "about to enter recursion in " << numsToLabel[u] << endl;
+      for (int i = 0; i < N; ++i) {
+        if (dist[i] != kInf) {
+          cerr << numsToLabel[i] << ":" << dist[i] << ' ';
+        }
       }
       cerr << endl;
 
@@ -139,10 +158,13 @@ bool DCBackprop(int source) {
 
     for (auto &edge : InEdges[u]) {
       if (edge.value < 0) {
+        // we can only get to this case if node u has been processed (first if
+        // statement before the loop) so all the relevant edges have been added
+        // to u's predecessor list
         continue;
       }
 
-      if (unsuitable(edge, u, source)) {
+      if (unsuitable(edge, starting_label)) {
         continue;
       }
 
@@ -153,11 +175,21 @@ bool DCBackprop(int source) {
         Q.push(NodeAndPrio(v, new_dist));
       }
     }
+    for (int i = 0; i < N; ++i) {
+      if (dist[i] != kInf) {
+        cerr << numsToLabel[i] << ":" << dist[i] << ' ';
+      }
+    }
+    cerr << endl;
+
+    cerr << endl;
   }
 
-  cerr << source << "'s propagation done" << endl;
-  for (int x = 0; x < N; ++x) {
-    cerr << dist[x] << " ";
+  cerr << numsToLabel[source] << "'s propagation done" << endl;
+  for (int i = 0; i < N; ++i) {
+    if (dist[i] != kInf) {
+      cerr << numsToLabel[i] << ":" << dist[i] << ' ';
+    }
   }
   cerr << endl;
 
@@ -173,27 +205,26 @@ bool DCBackprop(int source) {
 
 // Abi's code
 void parse() {
+  cerr << "PARSING!!" << endl;
   string str;
   getline(cin, str);
   // typenet reads in type of network
   string typenet;
   cin >> typenet;
-  cout << typenet << endl;
   getline(cin, str);
   getline(cin, str);
   // get N, M, and K
   cin >> N;
-  cout << N << endl;
   getline(cin, str);
   getline(cin, str);
   cin >> M;
-  cout << M << endl;
   getline(cin, str);
   getline(cin, str);
   cin >> K;
-  cout << K << endl;
   getline(cin, str);
   getline(cin, str);
+
+  cerr << "Read some stuff!!" << endl;
   // read in TPs from file
   for (int i = 0; i < N; i++) {
     string TP;
@@ -202,12 +233,7 @@ void parse() {
     numsToLabel.push_back(TP);
     // save index of TP in labelsToNum
     labelsToNum[TP] = i;
-    cout << TP << endl;
   }
-  for (string t : numsToLabel)
-    cout << "TPS: " << t << endl;
-  for (auto x : labelsToNum)
-    cout << "map: " << x.first << " " << x.second << endl;
   getline(cin, str);
   getline(cin, str);
 
@@ -219,9 +245,6 @@ void parse() {
     // finds index for each edge and saves to o
     A = labelsToNum.find(edge1)->second;
     B = labelsToNum.find(edge2)->second;
-    cout << edge1 << ": " << A << " " << value << " " << edge2 << ": " << B
-         << endl;
-
     // TODO(abi): this could probably go in a separate function
     InEdges[B].push_back(Edge(A, B, value, 'o'));
 
@@ -236,8 +259,6 @@ void parse() {
     cin >> edge1 >> low >> high >> edge2;
     A = labelsToNum.find(edge1)->second;
     B = labelsToNum.find(edge2)->second;
-    cout << A << ":" << edge1 << " " << low << " " << high << " " << B << ":"
-         << edge2 << endl;
 
     InEdges[A].push_back(Edge(B, A, -high, 'u', B));
     InEdges[B].push_back(Edge(A, B, low, 'l', B));
@@ -249,6 +270,8 @@ void parse() {
 int main() {
   parse();
 
+  cerr << "Done reading!" << endl;
+
   for (int i = 0; i < N; ++i) {
     for (auto &edge : InEdges[i]) {
       if (edge.value < 0) {
@@ -257,6 +280,8 @@ int main() {
       }
     }
   }
+
+  cerr << "Done finding negative nodes!" << endl;
 
   for (int i = 0; i < N; ++i) {
     if (is_negative_node[i]) {
