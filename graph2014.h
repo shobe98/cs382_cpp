@@ -10,17 +10,6 @@ using std::string;
 using std::unordered_map;
 using std::vector;
 
-struct Neighbour {
-//edge  
-int index; // the index of the neighbouring label -> one can get the edge from
-             // the edge vector.
-  char c;    // type of edge, o - ordinary, l - lower case, u - upper case
-
-  Neighbour(int index = 0, char c = 0) {
-    this->index = index;
-    this->c = c;
-  }
-};
 
 struct Edge {
   int A, B, value;
@@ -71,8 +60,6 @@ public:
   vector<vector<Edge>> InEdges;
 
   // Lists of neighbours -> basically the matrices prof Hunsberger showed us.
-  vector<vector<Neighbour>> ordNeighbours;
-  vector<vector<Neighbour>> ucNeighbours;
 
   STNU(int n) {
     this->N = n;
@@ -80,13 +67,10 @@ public:
     InEdges = vector<vector<Edge>>(n, vector<Edge>());
     indexEdges = vector<vector<int>>(n, vector<int>(n, kNaN));
 
-    ordNeighbours = vector<vector<Neighbour>>(n, vector<Neighbour>());
-    ucNeighbours = vector<vector<Neighbour>>(n, vector<Neighbour>());
   }
 
   void addEdge(const Edge &e);
 
-  void updateAllBufferedEdges();
 };
 
 #endif // _GRAPH_H_:
