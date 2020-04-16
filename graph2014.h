@@ -47,9 +47,9 @@ public:
   unordered_map<string, int> labelsToNum;
   vector<string> numsToLabel;
 
-  vector<bool> is_negative_node[kMaxLabels];
-  vector<bool> in_rec_stack[kMaxLabels];
-  vector<bool> done[kMaxLabels];
+  bool is_negative_node[kMaxLabels];
+  bool in_rec_stack[kMaxLabels];
+  bool done[kMaxLabels];
   
   // These  matrices are necessary to make sure we don't save duplicated edges
   // saves the index to the edge in the vector of edges or -1
@@ -73,4 +73,4 @@ public:
 
 };
 
-#endif // _GRAPH_H_:
+#endif // _GRAPH2014_H_:

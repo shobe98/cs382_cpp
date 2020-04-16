@@ -16,15 +16,15 @@ using std::vector;
  */
 void STNU::addEdge(const Edge &e) {
   //if an edge does not exist at TP e->B in the InEdge vector
-  if (indexEdges[e->A][e->B]==-1) {
+  if (indexEdges[e.A][e.B]==-1) {
     //add edge at e->B
-    indexEdges[e->A][e->B] = InEdges[e->B].size();
-    InEdges[e->B].push_back(e);
+    indexEdges[e.A][e.B] = InEdges[e.B].size();
+    InEdges[e.B].push_back(e);
   }
   //else, if it does exists
   else {
     //update the edge in InEdges
-    InEdges[e->B][indexEdges[e->A][e->b]] = e;
+    InEdges[e.B][indexEdges[e.A][e.B]] = e;
   }
 
   DEBUG && (cerr << "Added edge " << e.A << ' ' << e.B << ' ' << e.value
