@@ -63,19 +63,6 @@ bool unsuitable(const Edge &e, int u, int source, STNU *stnu) {
   return false; // all edges are suitable for now
 }
 
-bool unsuitable(const Edge &e, int u, int source) {
-  // If the starting node was a special node (i.e. a node that has exactly one
-  // ingoing UC edge)
-  if (InEdges[source].size() == 1 && InEdges[source][0].type == 'u') {
-    if (e.type == 'l') {
-      // Unsuitable if same labels.
-      return e.C == InEdges[source][0].C;
-    }
-  }
-  // Any other edge is suitable. Yay!
-  return false; // all edges are suitable for now
-}
-
 // for comodity we don't edit nodes int the heap, but keep track of wether we're
 // done with a node or not, and thus w ecan have a node appear multiple times in
 // the queue, I've done this multiple times with dijkstra, and the time
@@ -99,8 +86,6 @@ bool DCBackprop(int source, STNU *stnu) {
   vector<char> type(stnu->N, 'o'); // default to ordinary edges
   vector<int> label(stnu->N, 0);
   vector<bool> done_dijkstra(stnu->N, false);
-
-  int starting_label = -1;
 
   int starting_label = -1;
 
@@ -294,14 +279,6 @@ STNU *parse() {
     //todo : andrei add cont. link edge
     G->addEdge(Edge(B, A, -high, 'u', B));
     G->addEdge(Edge(A, B, low, 'l', B));
-
-    // TODO(andrei): Implement the transformation.
-    // As soon as we implement the transformation of the graph this will have to
-    // go somewhere else. Basically, since for every negative node we either
-    // have one negative UC edge -> where we need to keep track of its label or
-    // only oridnary edges, some negative -> where we don't have any label. This
-    // map keeps track of those nodes that have a label. Maps node index to UC
-    // label (also an index).
 
     // TODO(andrei): Implement the transformation.
     // As soon as we implement the transformation of the graph this will have to
