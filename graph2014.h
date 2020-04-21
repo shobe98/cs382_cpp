@@ -11,6 +11,14 @@ using std::unordered_map;
 using std::vector;
 
 
+/*
+ * Edge Struct
+ * Member Variables: int A: start TP,
+ *                   int B: end TP,
+ *                   int value: value of edge,
+ *                   int C: label of cont. link edge
+ *                   char type: type of edge
+ */
 struct Edge {
   int A, B, value;
   int C;
@@ -22,6 +30,8 @@ struct Edge {
     this->value = value;
     this->type = type;
     this->C = C;
+
+    //if ord. edge, C=0
     if (this->type == 'o') {
       assert(this->C == 0);
     }
@@ -56,7 +66,7 @@ public:
   vector<vector<int>> indexEdges;
 
   // keeps track of the incoming edges in the graph
-  // for InEdge[A][B], the edge saved is the edge going from B into A
+  // at InEdge[B], the edge saved is the edge going from A to B
   vector<vector<Edge>> InEdges;
 
   // Lists of neighbours -> basically the matrices prof Hunsberger showed us.

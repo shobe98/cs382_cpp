@@ -10,7 +10,7 @@ using std::vector;
 // eventually.
 #define DEBUG 1
 
-/* Input: An Edge
+/*  Input: An Edge
  *  Effect: Saves an edge in the InEdges vector containing all edges
  *          or updates the edge if it already exists.
  */
