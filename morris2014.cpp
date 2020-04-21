@@ -227,9 +227,35 @@ bool DCBackprop(int source) {
   return true;
 }
 
-// TODO(anybody): According to section 3 (right before 3.1) the STNU should be
-// in normal form.
 // TODO(anybody): We should also have a function that transforms the graph.
+// TODO(andrei): Implement the transformation.
+// As soon as we implement the transformation of the graph this will have to
+// go somewhere else. Basically, since for every negative node we either
+// have one negative UC edge -> where we need to keep track of its label or
+// only oridnary edges, some negative -> where we don't have any label. This
+// map keeps track of those nodes that have a label. Maps node index to UC
+// label (also an index).
+
+void addContLink(string &label1, int low, int high, string &label2,
+                 int cont_link_index) {
+  int A = labelsToNum.find(label1)->second;
+  int B = labelsToNum.find(label2)->second;
+
+  // First transform the edge into "normal" form. I.e. A =(lo, hi)=> B becomes
+  // A <--lo--> AN =(0, hi-lo)=> B. Thus, add the ordinary edge.
+
+  int AN;
+  string AN_label = label1 + to_string(cont_link_index);
+  AN = labelsToNum[AN_label] = numsToLabel.size();
+  numsToLabel.push_back(AN_label);
+
+  InEdges[AN].push_back(Edge(A, AN, low, 'o'));
+  InEdges[A].push_back(Edge(AN, A, -low, 'o'));
+
+  // - (high - low) = low - high
+  InEdges[A].push_back(Edge(B, AN, low - high, 'u', B));
+  InEdges[B].push_back(Edge(AN, B, 0, 'l', B));
+}
 
 // Abi's code
 void parse() {
@@ -267,12 +293,12 @@ void parse() {
 
   for (int i = 0; i < M; i++) {
     int A, B, value;
-    string edge1, edge2;
+    string label1, label2;
     // reads in string names for edges and value
-    cin >> edge1 >> value >> edge2;
+    cin >> label1 >> value >> label2;
     // finds index for each edge and saves to o
-    A = labelsToNum.find(edge1)->second;
-    B = labelsToNum.find(edge2)->second;
+    A = labelsToNum.find(label1)->second;
+    B = labelsToNum.find(label2)->second;
     // TODO(abi): this could probably go in a separate function
     InEdges[B].push_back(Edge(A, B, value, 'o'));
 
@@ -282,23 +308,11 @@ void parse() {
 
   // reads in Cont. Link Edges
   for (int i = 0; i < K; i++) {
-    int A, B, low, high;
-    string edge1, edge2;
-    cin >> edge1 >> low >> high >> edge2;
-    A = labelsToNum.find(edge1)->second;
-    B = labelsToNum.find(edge2)->second;
+    int low, high;
+    string label1, label2;
+    cin >> label1 >> low >> high >> label2;
 
-    InEdges[A].push_back(Edge(B, A, -high, 'u', B));
-    InEdges[B].push_back(Edge(A, B, low, 'l', B));
-
-    // TODO(andrei): Implement the transformation.
-    // As soon as we implement the transformation of the graph this will have to
-    // go somewhere else. Basically, since for every negative node we either
-    // have one negative UC edge -> where we need to keep track of its label or
-    // only oridnary edges, some negative -> where we don't have any label. This
-    // map keeps track of those nodes that have a label. Maps node index to UC
-    // label (also an index).
-
+    addContLink(label1, low, high, label2, i);
     getline(cin, str);
   }
 }
