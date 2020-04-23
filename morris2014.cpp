@@ -31,13 +31,6 @@ struct NodeAndPrio {
 };
 
 // Returns true if edge is unsuitable
-inline bool unsuitable(const Edge &e, const int &starting_label) {
-  // For now an edge is unsuitable iff it is a lower case edge and it  has the
-  // same label as the initial uc edge
-  // I'll leave this as a function in case we need to add anithing else here
-  return e.type != 'u' && starting_label == e.C;
-}
-
 bool unsuitable(const Edge &e, int u, int source, STNU *stnu) {
   // If the starting node was a special node (i.e. a node that has exactly one
   // ingoing UC edge)
