@@ -1,3 +1,4 @@
+#include "graph2014.h"
 #include <algorithm>
 #include <cassert>
 #include <fstream>
@@ -5,7 +6,6 @@
 #include <queue>
 #include <unordered_map>
 #include <vector>
-#include "graph2014.h"
 using namespace std;
 
 static int DEBUG = 0;
@@ -38,46 +38,21 @@ inline bool unsuitable(const Edge &e, const int &starting_label) {
   return e.type != 'u' && starting_label == e.C;
 }
 
-// STNU representation
-//int N, M, K;
-
-//vector<Edge> InEdges[kMaxLabels];
-/*
-unordered_map<string, int> labelsToNum;
-vector<string> numsToLabel;
-
-bool is_negative_node[kMaxLabels];
-bool in_rec_stack[kMaxLabels];
-bool done[kMaxLabels];
-*/
-bool unsuitable(const Edge &e, int u, int source, STNU *stnu) {
-  // If the starting node was a special node (i.e. a node that has exactly one
-  // ingoing UC edge)
-  if (stnu->InEdges[source].size() == 1 && stnu->InEdges[source][0].type == 'u') {
-    if (e.type == 'l') {
-      // Unsuitable if same labels.
-      return e.C == stnu->InEdges[source][0].C;
-    }
-  }
-  // Any other edge is suitable. Yay!
-  return false; // all edges are suitable for now
-}
-
 // for comodity we don't edit nodes int the heap, but keep track of wether we're
 // done with a node or not, and thus w ecan have a node appear multiple times in
 // the queue, I've done this multiple times with dijkstra, and the time
 // difference is not significant enough to make it reasonable to implement a
 // heap from scratch.
 bool DCBackprop(int source, STNU *stnu) {
+  DEBUG && (cerr << "Currently running DCBackprop from "
+                 << stnu->numsToLabel[source] << endl);
   if (stnu->in_rec_stack[source]) {
     return false;
   }
   if (stnu->done[source]) {
+    cerr << "Node was processed before!" << endl;
     return true;
   }
-
-  DEBUG && (cerr << "Currently running DCBackprop from " << stnu->numsToLabel[source]
-                 << endl);
 
   stnu->in_rec_stack[source] = true;
 
@@ -101,6 +76,7 @@ bool DCBackprop(int source, STNU *stnu) {
       Q.push(NodeAndPrio(edge.A, dist[edge.A]));
 
       if (edge.type == 'u') {
+        assert(starting_label == -1);
         starting_label = edge.C;
       }
     }
@@ -133,12 +109,8 @@ bool DCBackprop(int source, STNU *stnu) {
       //
       // As mentioned in the paper, we only add ordinary edges "by virtue of
       // label removal rule" (where applicable).
-      //
-      // TODO(astanciu): The label removal rule only works if the label we
-      // started with is different than u. Should be checked, righ? @Prof
-      // Hunsberger ?
       stnu->addEdge(Edge(u, source, dist[u], 'o'));
-      //stnu->InEdges[source].push_back(Edge(u, source, dist[u], 'o'));
+      // stnu->InEdges[source].push_back(Edge(u, source, dist[u], 'o'));
       DEBUG && (cerr << "Added ord edge " << stnu->numsToLabel[u] << ' '
                      << stnu->numsToLabel[source] << ' ' << dist[u] << endl);
       continue;
@@ -153,7 +125,7 @@ bool DCBackprop(int source, STNU *stnu) {
       }
       cerr << endl;
 
-      if (DCBackprop(u,stnu) == false) {
+      if (DCBackprop(u, stnu) == false) {
         return false;
       }
     }
@@ -171,6 +143,10 @@ bool DCBackprop(int source, STNU *stnu) {
       if (unsuitable(edge, starting_label)) {
         continue;
       }
+
+      cerr << "Processing edge ";
+      stnu->printEdge(edge);
+      cerr << endl;
 
       int v = edge.A;
       int new_dist = dist[u] + edge.value;
@@ -208,10 +184,6 @@ bool DCBackprop(int source, STNU *stnu) {
   return true;
 }
 
-// TODO(anybody): According to section 3 (right before 3.1) the STNU should be
-// in normal form.
-// TODO(anybody): We should also have a function that transforms the graph.
-
 // Abi's code
 STNU *parse() {
   cerr << "PARSING!!" << endl;
@@ -222,25 +194,27 @@ STNU *parse() {
   cin >> typenet;
   getline(cin, str);
   getline(cin, str);
-  
+
   // get n and instantiate STNU *G
-  int n;
+  int n, m, k;
   cin >> n;
-  STNU *G = new STNU(n);
   getline(cin, str);
   getline(cin, str);
-  
-  //Get M and K and save to STNU graph G
-  cin >> G->M;
+
+  // Get M and K and save to STNU graph G
+  cin >> m;
   getline(cin, str);
   getline(cin, str);
-  cin >> G->K;
+  cin >> k;
+
+  STNU *G = new STNU(n, m, k);
+
   getline(cin, str);
   getline(cin, str);
 
   cerr << "Read some stuff!!" << endl;
   // read in TPs from file
-  for (int i = 0; i < G->N; i++) {
+  for (int i = 0; i < n; i++) {
     string TP;
     cin >> TP;
     // pushback TP name onto numsToLabel
@@ -253,15 +227,15 @@ STNU *parse() {
 
   for (int i = 0; i < G->M; i++) {
     int A, B, value;
-    string edge1, edge2;
+    string label1, label2;
     // reads in string names for edges and value
-    cin >> edge1 >> value >> edge2;
+    cin >> label1 >> value >> label2;
     // finds index for each edge and saves to o
-    A = G->labelsToNum.find(edge1)->second;
-    B = G->labelsToNum.find(edge2)->second;
-    
+    A = G->labelsToNum.find(label1)->second;
+    B = G->labelsToNum.find(label2)->second;
+
     // adds incoming ord. edge to STNU graph
-    G->addEdge(Edge(A,B,value,'o'));
+    G->addEdge(Edge(A, B, value, 'o'));
 
     getline(cin, str);
   }
@@ -269,25 +243,12 @@ STNU *parse() {
 
   // reads in Cont. Link Edges
   for (int i = 0; i < G->K; i++) {
-    int A, B, low, high;
-    string edge1, edge2;
-    cin >> edge1 >> low >> high >> edge2;
-    A = G->labelsToNum.find(edge1)->second;
-    B = G->labelsToNum.find(edge2)->second;
+    int low, high;
+    string label1, label2;
+    cin >> label1 >> low >> high >> label2;
 
-    //adds incoming cont. link edges to graph
-    //todo : andrei add cont. link edge
-    G->addEdge(Edge(B, A, -high, 'u', B));
-    G->addEdge(Edge(A, B, low, 'l', B));
-
-    // TODO(andrei): Implement the transformation.
-    // As soon as we implement the transformation of the graph this will have to
-    // go somewhere else. Basically, since for every negative node we either
-    // have one negative UC edge -> where we need to keep track of its label or
-    // only oridnary edges, some negative -> where we don't have any label. This
-    // map keeps track of those nodes that have a label. Maps node index to UC
-    // label (also an index).
-
+    // adds incoming cont. link edges to graph
+    G->addContLink(label1, low, high, label2, i);
     getline(cin, str);
   }
   return G;
@@ -320,7 +281,8 @@ int main(int argc, char *argv[]) {
 
   for (int i = 0; i < Graph->N; ++i) {
     if (Graph->is_negative_node[i]) {
-      if (!DCBackprop(i,Graph)) {
+      cerr << "Going to call DCBackprop from main!" << endl;
+      if (!DCBackprop(i, Graph)) {
         cout << "Not DC!" << endl;
         return 0;
       }

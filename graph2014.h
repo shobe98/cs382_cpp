@@ -7,9 +7,9 @@
 #include <unordered_map>
 #include <vector>
 using std::string;
+using std::to_string;
 using std::unordered_map;
 using std::vector;
-
 
 /*
  * Edge Struct
@@ -24,20 +24,19 @@ struct Edge {
   int C;
   char type;
 
-  Edge(int A=0, int B =0, int value = 0, char type = 0, int C = 0) {
+  Edge(int A = 0, int B = 0, int value = 0, char type = 0, int C = 0) {
     this->A = A;
     this->B = B;
     this->value = value;
     this->type = type;
     this->C = C;
 
-    //if ord. edge, C=0
+    // if ord. edge, C=0
     if (this->type == 'o') {
       assert(this->C == 0);
     }
   };
 };
-
 
 class STNU {
 public:
@@ -52,7 +51,7 @@ public:
   int N, M, K;
 
   bool has_negative_cycle = false;
-  
+
   // mappings between labels and ints and back
   unordered_map<string, int> labelsToNum;
   vector<string> numsToLabel;
@@ -60,7 +59,7 @@ public:
   bool is_negative_node[kMaxLabels];
   bool in_rec_stack[kMaxLabels];
   bool done[kMaxLabels];
-  
+
   // These  matrices are necessary to make sure we don't save duplicated edges
   // saves the index to the edge in the vector of edges or -1
   vector<vector<int>> indexEdges;
@@ -71,16 +70,23 @@ public:
 
   // Lists of neighbours -> basically the matrices prof Hunsberger showed us.
 
-  STNU(int n) {
-    this->N = n;
-    
-    InEdges = vector<vector<Edge>>(n, vector<Edge>());
-    indexEdges = vector<vector<int>>(n, vector<int>(n, kNaN));
+  STNU(int n, int m, int k) {
+    this->N = n + k;
+    this->K = k;
+    this->M = m;
 
+    InEdges = vector<vector<Edge>>(N, vector<Edge>());
+    indexEdges = vector<vector<int>>(N, vector<int>(N, kNaN));
   }
 
   void addEdge(const Edge &e);
 
+  // Adds a contingent link to the graph. It takes care of the normalisation
+  // transformation. It adds a new node to the graph for each cont-link added.
+  void addContLink(string &label1, int low, int high, string &label2,
+                   int cont_link_index);
+
+  void printEdge(const Edge &e);
 };
 
 #endif // _GRAPH2014_H_:
