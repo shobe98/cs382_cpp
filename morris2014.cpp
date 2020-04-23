@@ -1,3 +1,4 @@
+#include "graph2014.h"
 #include <algorithm>
 #include <cassert>
 #include <fstream>
@@ -29,27 +30,6 @@ struct NodeAndPrio {
   }
 };
 
-struct Edge {
-  int A, B, value;
-  int C;     // optional, if edge
-  char type; // 'o', 'u', 'l'
-
-  Edge(int A = 0, int B = 0, int value = 0, char type = 0, int C = 0) {
-    this->A = A;
-    this->B = B;
-    this->value = value;
-    this->type = type;
-    this->C = C;
-    if (this->type == 'o') {
-      assert(this->C == 0);
-    }
-  };
-
-  // Edge(0, 1, 100, 'o')
-  // or
-  // Edge(0, 1, 100, 'l', 1) // lower case edge towards 1, the label on it is 1
-};
-
 // Returns true if edge is unsuitable
 inline bool unsuitable(const Edge &e, const int &starting_label) {
   // For now an edge is unsuitable iff it is a lower case edge and it  has the
@@ -58,25 +38,14 @@ inline bool unsuitable(const Edge &e, const int &starting_label) {
   return e.type != 'u' && starting_label == e.C;
 }
 
-// STNU representation
-int N, M, K;
-
-vector<Edge> InEdges[kMaxLabels];
-
-unordered_map<string, int> labelsToNum;
-vector<string> numsToLabel;
-
-bool is_negative_node[kMaxLabels];
-bool in_rec_stack[kMaxLabels];
-bool done[kMaxLabels];
-
-bool unsuitable(const Edge &e, int u, int source) {
+bool unsuitable(const Edge &e, int u, int source, STNU *stnu) {
   // If the starting node was a special node (i.e. a node that has exactly one
   // ingoing UC edge)
-  if (InEdges[source].size() == 1 && InEdges[source][0].type == 'u') {
+  if (stnu->InEdges[source].size() == 1 &&
+      stnu->InEdges[source][0].type == 'u') {
     if (e.type == 'l') {
       // Unsuitable if same labels.
-      return e.C == InEdges[source][0].C;
+      return e.C == stnu->InEdges[source][0].C;
     }
   }
   // Any other edge is suitable. Yay!
@@ -88,24 +57,24 @@ bool unsuitable(const Edge &e, int u, int source) {
 // the queue, I've done this multiple times with dijkstra, and the time
 // difference is not significant enough to make it reasonable to implement a
 // heap from scratch.
-bool DCBackprop(int source) {
-  if (in_rec_stack[source]) {
+bool DCBackprop(int source, STNU *stnu) {
+  DEBUG && (cerr << "Currently running DCBackprop from "
+                 << stnu->numsToLabel[source] << endl);
+  if (stnu->in_rec_stack[source]) {
     return false;
   }
-  if (done[source]) {
+  if (stnu->done[source]) {
+    cerr << "Node was processed before!" << endl;
     return true;
   }
 
-  DEBUG && (cerr << "Currently running DCBackprop from " << numsToLabel[source]
-                 << endl);
-
-  in_rec_stack[source] = true;
+  stnu->in_rec_stack[source] = true;
 
   // change with N
-  vector<int> dist(N, kInf);
-  vector<char> type(N, 'o'); // default to ordinary edges
-  vector<int> label(N, 0);
-  vector<bool> done_dijkstra(N, false);
+  vector<int> dist(stnu->N, kInf);
+  vector<char> type(stnu->N, 'o'); // default to ordinary edges
+  vector<int> label(stnu->N, 0);
+  vector<bool> done_dijkstra(stnu->N, false);
 
   int starting_label = -1;
 
@@ -113,7 +82,7 @@ bool DCBackprop(int source) {
 
   priority_queue<NodeAndPrio> Q;
 
-  for (auto &edge : InEdges[source]) {
+  for (auto &edge : stnu->InEdges[source]) {
     // Only initialize the preds of the negative node connected by negative
     // edges
     if (edge.value < 0) {
@@ -121,6 +90,7 @@ bool DCBackprop(int source) {
       Q.push(NodeAndPrio(edge.A, dist[edge.A]));
 
       if (edge.type == 'u') {
+        assert(starting_label == -1);
         starting_label = edge.C;
       }
     }
@@ -140,7 +110,7 @@ bool DCBackprop(int source) {
 
     // done popping
 
-    cerr << endl << "Expanding node " << numsToLabel[u] << endl;
+    cerr << endl << "Expanding node " << stnu->numsToLabel[u] << endl;
 
     if (dist[u] >= 0) {
       // add new edge u->source
@@ -153,33 +123,30 @@ bool DCBackprop(int source) {
       //
       // As mentioned in the paper, we only add ordinary edges "by virtue of
       // label removal rule" (where applicable).
-      //
-      // TODO(astanciu): The label removal rule only works if the label we
-      // started with is different than u. Should be checked, righ? @Prof
-      // Hunsberger ?
-      InEdges[source].push_back(Edge(u, source, dist[u], 'o'));
-      DEBUG && (cerr << "Added ord edge " << numsToLabel[u] << ' '
-                     << numsToLabel[source] << ' ' << dist[u] << endl);
+      stnu->addEdge(Edge(u, source, dist[u], 'o'));
+      // stnu->InEdges[source].push_back(Edge(u, source, dist[u], 'o'));
+      DEBUG && (cerr << "Added ord edge " << stnu->numsToLabel[u] << ' '
+                     << stnu->numsToLabel[source] << ' ' << dist[u] << endl);
       continue;
     }
 
-    if (is_negative_node[u]) {
-      cerr << "about to enter recursion in " << numsToLabel[u] << endl;
-      for (int i = 0; i < N; ++i) {
+    if (stnu->is_negative_node[u]) {
+      cerr << "about to enter recursion in " << stnu->numsToLabel[u] << endl;
+      for (int i = 0; i < stnu->N; ++i) {
         if (dist[i] != kInf) {
-          cerr << numsToLabel[i] << ":" << dist[i] << ' ';
+          cerr << stnu->numsToLabel[i] << ":" << dist[i] << ' ';
         }
       }
       cerr << endl;
 
-      if (DCBackprop(u) == false) {
+      if (DCBackprop(u, stnu) == false) {
         return false;
       }
     }
 
     // WARN: If an edge gets added inside this forloop, iterators can get
     // invalidated. Safe for now.
-    for (auto &edge : InEdges[u]) {
+    for (auto &edge : stnu->InEdges[u]) {
       if (edge.value < 0) {
         // we can only get to this case if node u has been processed (first if
         // statement before the loop) so all the relevant edges have been added
@@ -191,6 +158,10 @@ bool DCBackprop(int source) {
         continue;
       }
 
+      cerr << "Processing edge ";
+      stnu->printEdge(edge);
+      cerr << endl;
+
       int v = edge.A;
       int new_dist = dist[u] + edge.value;
       if (new_dist < dist[v]) {
@@ -198,9 +169,9 @@ bool DCBackprop(int source) {
         Q.push(NodeAndPrio(v, new_dist));
       }
     }
-    for (int i = 0; i < N; ++i) {
+    for (int i = 0; i < stnu->N; ++i) {
       if (dist[i] != kInf) {
-        cerr << numsToLabel[i] << ":" << dist[i] << ' ';
+        cerr << stnu->numsToLabel[i] << ":" << dist[i] << ' ';
       }
     }
     cerr << endl;
@@ -208,16 +179,16 @@ bool DCBackprop(int source) {
     cerr << endl;
   }
 
-  DEBUG &&cerr << numsToLabel[source] << "'s propagation done" << endl;
-  for (int i = 0; i < N; ++i) {
+  DEBUG &&cerr << stnu->numsToLabel[source] << "'s propagation done" << endl;
+  for (int i = 0; i < stnu->N; ++i) {
     if (dist[i] != kInf) {
-      DEBUG &&cerr << numsToLabel[i] << ":" << dist[i] << ' ';
+      DEBUG &&cerr << stnu->numsToLabel[i] << ":" << dist[i] << ' ';
     }
   }
   DEBUG &&cerr << endl;
 
-  done[source] = true;
-  in_rec_stack[source] = false;
+  stnu->done[source] = true;
+  stnu->in_rec_stack[source] = false;
 
   // Andrei's addition to the algorithm.
   // It is mentioned in the paper but nor present in the pseudocode.
@@ -236,29 +207,8 @@ bool DCBackprop(int source) {
 // map keeps track of those nodes that have a label. Maps node index to UC
 // label (also an index).
 
-void addContLink(string &label1, int low, int high, string &label2,
-                 int cont_link_index) {
-  int A = labelsToNum.find(label1)->second;
-  int B = labelsToNum.find(label2)->second;
-
-  // First transform the edge into "normal" form. I.e. A =(lo, hi)=> B becomes
-  // A <--lo--> AN =(0, hi-lo)=> B. Thus, add the ordinary edge.
-
-  int AN;
-  string AN_label = label1 + to_string(cont_link_index);
-  AN = labelsToNum[AN_label] = numsToLabel.size();
-  numsToLabel.push_back(AN_label);
-
-  InEdges[AN].push_back(Edge(A, AN, low, 'o'));
-  InEdges[A].push_back(Edge(AN, A, -low, 'o'));
-
-  // - (high - low) = low - high
-  InEdges[A].push_back(Edge(B, AN, low - high, 'u', B));
-  InEdges[B].push_back(Edge(AN, B, 0, 'l', B));
-}
-
 // Abi's code
-void parse() {
+STNU *parse() {
   cerr << "PARSING!!" << endl;
   string str;
   getline(cin, str);
@@ -267,54 +217,64 @@ void parse() {
   cin >> typenet;
   getline(cin, str);
   getline(cin, str);
-  // get N, M, and K
-  cin >> N;
+
+  // get n and instantiate STNU *G
+  int n, m, k;
+  cin >> n;
   getline(cin, str);
   getline(cin, str);
-  cin >> M;
+
+  // Get M and K and save to STNU graph G
+  cin >> m;
   getline(cin, str);
   getline(cin, str);
-  cin >> K;
+  cin >> k;
+
+  STNU *G = new STNU(n, m, k);
+
   getline(cin, str);
   getline(cin, str);
 
   cerr << "Read some stuff!!" << endl;
   // read in TPs from file
-  for (int i = 0; i < N; i++) {
+  for (int i = 0; i < n; i++) {
     string TP;
     cin >> TP;
     // pushback TP name onto numsToLabel
-    numsToLabel.push_back(TP);
+    G->numsToLabel.push_back(TP);
     // save index of TP in labelsToNum
-    labelsToNum[TP] = i;
+    G->labelsToNum[TP] = i;
   }
   getline(cin, str);
   getline(cin, str);
 
-  for (int i = 0; i < M; i++) {
+  for (int i = 0; i < G->M; i++) {
     int A, B, value;
     string label1, label2;
     // reads in string names for edges and value
     cin >> label1 >> value >> label2;
     // finds index for each edge and saves to o
-    A = labelsToNum.find(label1)->second;
-    B = labelsToNum.find(label2)->second;
-    // TODO(abi): this could probably go in a separate function
-    InEdges[B].push_back(Edge(A, B, value, 'o'));
+    A = G->labelsToNum.find(label1)->second;
+    B = G->labelsToNum.find(label2)->second;
+
+    // adds incoming ord. edge to STNU graph
+    G->addEdge(Edge(A, B, value, 'o'));
 
     getline(cin, str);
   }
   getline(cin, str);
 
   // reads in Cont. Link Edges
-  for (int i = 0; i < K; i++) {
+  for (int i = 0; i < G->K; i++) {
     int low, high;
     string label1, label2;
     cin >> label1 >> low >> high >> label2;
 
-    addContLink(label1, low, high, label2, i);
+    // adds incoming cont. link edges to graph
+    G->addContLink(label1, low, high, label2, i);
     getline(cin, str);
   }
+  return G;
 }
 
 int main(int argc, char *argv[]) {
@@ -327,14 +287,14 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  parse();
+  STNU *Graph = parse();
 
   cerr << "Done reading!" << endl;
 
-  for (int i = 0; i < N; ++i) {
-    for (auto &edge : InEdges[i]) {
+  for (int i = 0; i < Graph->N; ++i) {
+    for (auto &edge : Graph->InEdges[i]) {
       if (edge.value < 0) {
-        is_negative_node[i] = true;
+        Graph->is_negative_node[i] = true;
         break;
       }
     }
@@ -342,9 +302,10 @@ int main(int argc, char *argv[]) {
 
   cerr << "Done finding negative nodes!" << endl;
 
-  for (int i = 0; i < N; ++i) {
-    if (is_negative_node[i]) {
-      if (!DCBackprop(i)) {
+  for (int i = 0; i < Graph->N; ++i) {
+    if (Graph->is_negative_node[i]) {
+      cerr << "Going to call DCBackprop from main!" << endl;
+      if (!DCBackprop(i, Graph)) {
         cout << "Not DC!" << endl;
         return 0;
       }
