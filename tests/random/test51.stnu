@@ -1,0 +1,19 @@
+# KIND OF NETWORK
+STNU
+# Num Time-Points
+5
+# Num Ordinary Edges
+2
+# Num Contingent Links
+4
+#Time - Point Names
+A B C D E 
+# Ordinary Edges
+A 5 A
+D -13 B
+# Contingent Links
+E 16 24 E
+D 11 16 A
+A 17 22 C
+C 0 4 B
+
