@@ -14,6 +14,8 @@ using std::vector;
  *          or updates the edge if it already exists.
  */
 void STNU::addEdge(const Edge &e) {
+  assert(e.A < indexEdges.size());
+  assert(e.B < indexEdges[e.A].size());
   // if an edge does not exist at TP e->B in the InEdge vector
   if (indexEdges[e.A][e.B] == -1) {
     // add edge at e->B

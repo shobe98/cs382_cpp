@@ -41,10 +41,6 @@ struct Edge {
 
 class STNU {
 public:
-  // since the algorithm is O(n^4) running on more than 1000 would crash the
-  // computer, so for now let the max number of labels be 1000
-  static const int kMaxLabels = 1000;
-
   // -INF, a value we use to code missing values, edges etc
   static const int kNaN = -1; // -1 for now
 
@@ -57,12 +53,12 @@ public:
   unordered_map<string, int> labelsToNum;
   vector<string> numsToLabel;
 
-  bool is_negative_node[kMaxLabels];
-  bool in_rec_stack[kMaxLabels];
-  bool done[kMaxLabels];
+  vector<bool> is_negative_node;
+  vector<bool> in_rec_stack;
+  vector<bool> done;
 
   // True if debugging printfs are enabled
-  bool debug;
+  bool debug = false;
 
   // These  matrices are necessary to make sure we don't save duplicated edges
   // saves the index to the edge in the vector of edges or -1
@@ -77,7 +73,7 @@ public:
   STNU(int n, int m, int k) {}
 
   STNU(string filename, bool _debug = false) {
-    this->debug = debug;
+    this->debug = _debug;
     ifstream fin(filename);
 
     debug &&cerr << "PARSING!!" << endl;
@@ -110,11 +106,12 @@ public:
 
     InEdges = vector<vector<Edge>>(N, vector<Edge>());
     indexEdges = vector<vector<int>>(N, vector<int>(N, kNaN));
+    done = vector<bool>(N, false);
+    in_rec_stack = vector<bool>(N, false);
+    is_negative_node = vector<bool>(N, false);
 
     getline(fin, str);
     getline(fin, str);
-
-    cout << n << ' ' << m << ' ' << k;
 
     // read in TPs from file
     for (int i = 0; i < n; i++) {

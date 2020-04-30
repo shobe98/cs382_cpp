@@ -8,8 +8,6 @@
 #include <vector>
 using namespace std;
 
-static int DEBUG = 0;
-
 const int kMaxLabels = 1000;
 const int kNaN = -1; // -1 for now
 const int kInf = 0x3f3f3f3f;
@@ -58,7 +56,6 @@ bool DCBackprop(int source, STNU *stnu, bool debug = false) {
 
   // change with N
   vector<int> dist(stnu->N, kInf);
-  vector<char> type(stnu->N, 'o'); // default to ordinary edges
   vector<int> label(stnu->N, 0);
   vector<bool> done_dijkstra(stnu->N, false);
 
@@ -168,7 +165,7 @@ bool DCBackprop(int source, STNU *stnu, bool debug = false) {
       cerr << endl;
     }
 
-    cerr << endl;
+    debug &&cerr << endl;
   }
 
   if (debug) {
@@ -192,14 +189,14 @@ bool DCBackprop(int source, STNU *stnu, bool debug = false) {
 }
 
 bool morris2014(string filename, bool debug = false) {
-  STNU *Graph = new STNU(filename, debug);
+  STNU Graph(filename, debug);
 
   debug &&cerr << "Done reading!" << endl;
 
-  for (int i = 0; i < Graph->N; ++i) {
-    for (auto &edge : Graph->InEdges[i]) {
+  for (int i = 0; i < Graph.N; ++i) {
+    for (auto &edge : Graph.InEdges[i]) {
       if (edge.value < 0) {
-        Graph->is_negative_node[i] = true;
+        Graph.is_negative_node[i] = true;
         break;
       }
     }
@@ -207,10 +204,10 @@ bool morris2014(string filename, bool debug = false) {
 
   debug &&cerr << "Done finding negative nodes!" << endl;
 
-  for (int i = 0; i < Graph->N; ++i) {
-    if (Graph->is_negative_node[i]) {
-      cerr << "Going to call DCBackprop from main!" << endl;
-      if (!DCBackprop(i, Graph)) {
+  for (int i = 0; i < Graph.N; ++i) {
+    if (Graph.is_negative_node[i]) {
+      debug &&cerr << "Going to call DCBackprop from main!" << endl;
+      if (!DCBackprop(i, &Graph)) {
         debug &&cout << "Not DC!" << endl;
         return false;
       }
@@ -222,20 +219,25 @@ bool morris2014(string filename, bool debug = false) {
 }
 
 int main(int argc, char *argv[]) {
+  bool debug = false;
   if (argc >= 3) {
     if (string(argv[1]) == "--verbose=true") {
-      DEBUG = 1;
-
+      debug = true;
     } else if (string(argv[1]) != "--verbose=false") {
       cout << "Usage: ./morris2014  --verbose={true/false} testfile "
               "[testfiles..]"
            << endl;
       exit(1);
     }
+  } else {
+    cout << "Usage: ./morris2014  --verbose={true/false} testfile "
+            "[testfiles..]"
+         << endl;
+    exit(1);
   }
 
   for (int i = 2; i < argc; ++i) {
-    cout << argv[i] << " Morris 2014: " << morris2014(string(argv[i]), DEBUG)
+    cout << argv[i] << " Morris 2014: " << morris2014(string(argv[i]), debug)
          << endl;
   }
 
