@@ -61,6 +61,9 @@ public:
   bool in_rec_stack[kMaxLabels];
   bool done[kMaxLabels];
 
+  // True if debugging printfs are enabled
+  bool debug;
+
   // These  matrices are necessary to make sure we don't save duplicated edges
   // saves the index to the edge in the vector of edges or -1
   vector<vector<int>> indexEdges;
@@ -71,16 +74,10 @@ public:
 
   // Lists of neighbours -> basically the matrices prof Hunsberger showed us.
 
-  STNU(int n, int m, int k) {
-    this->N = n + k;
-    this->K = k;
-    this->M = m;
+  STNU(int n, int m, int k) {}
 
-    InEdges = vector<vector<Edge>>(N, vector<Edge>());
-    indexEdges = vector<vector<int>>(N, vector<int>(N, kNaN));
-  }
-
-  STNU(string filename, bool debug = false) {
+  STNU(string filename, bool _debug = false) {
+    this->debug = debug;
     ifstream fin(filename);
 
     debug &&cerr << "PARSING!!" << endl;
@@ -107,10 +104,17 @@ public:
     fin >> k;
 
     // Initialize constructor as we used to
-    STNU(n, m, k);
+    this->N = n + k;
+    this->K = k;
+    this->M = m;
+
+    InEdges = vector<vector<Edge>>(N, vector<Edge>());
+    indexEdges = vector<vector<int>>(N, vector<int>(N, kNaN));
 
     getline(fin, str);
     getline(fin, str);
+
+    cout << n << ' ' << m << ' ' << k;
 
     // read in TPs from file
     for (int i = 0; i < n; i++) {

@@ -3,23 +3,20 @@ STNU
 # Num Time-Points
 11
 # Num Ordinary Edges
-8
+7
 # Num Contingent Links
-4
+2
 #Time - Point Names
 A B C D E F G H I J K 
 # Ordinary Edges
-A -4 H
-C 9 J
-A -3 G
-K 2 C
-K 3 D
-F -12 A
-B -17 C
-K -9 I
+I -11 H
+H -3 D
+H 18 B
+H 19 C
+H 12 D
+K -8 E
+K 18 G
 # Contingent Links
-A 17 19 C
-I 9 15 H
-D 8 13 J
-D 1 6 H
+K 4 5 C
+B 9 11 J
 

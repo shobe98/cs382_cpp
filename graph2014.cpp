@@ -8,7 +8,6 @@ using std::min;
 using std::vector;
 // Control flag to turn debugging on or off. could be passed as a user parameter
 // eventually.
-#define DEBUG 1
 
 /*  Input: An Edge
  *  Effect: Saves an edge in the InEdges vector containing all edges
@@ -26,14 +25,18 @@ void STNU::addEdge(const Edge &e) {
     // update the edge in InEdges
     InEdges[e.B][indexEdges[e.A][e.B]] = e;
   }
-  cerr << "Added edge: ";
-  printEdge(e);
-  cerr << endl;
+  if (debug) {
+    cerr << "Added edge: ";
+    printEdge(e);
+    cerr << endl;
+  }
 }
 
 void STNU::printEdge(const Edge &e) {
-  DEBUG && (cerr << numsToLabel[e.A] << ' ' << numsToLabel[e.B] << ' '
-                 << e.value << ' ' << e.type);
+  // If this method is called, it always prints, regardless of debug flag
+  // check of the debug flag should be done before calling this function
+  cerr << numsToLabel[e.A] << ' ' << numsToLabel[e.B] << ' ' << e.value << ' '
+       << e.type;
 }
 
 void STNU::addContLink(string &label1, int low, int high, string &label2,
@@ -49,16 +52,16 @@ void STNU::addContLink(string &label1, int low, int high, string &label2,
   AN = labelsToNum[AN_label] = numsToLabel.size();
   numsToLabel.push_back(AN_label);
 
-  cerr << "We have the labels!" << endl;
+  debug &&cerr << "We have the labels!" << endl;
 
   addEdge(Edge(A, AN, low, 'o'));
   addEdge(Edge(AN, A, -low, 'o'));
 
-  cerr << "Added ordinary edges!" << endl;
+  debug &&cerr << "Added ordinary edges!" << endl;
 
   // - (high - low) = low - high
   addEdge(Edge(B, AN, low - high, 'u', B));
   addEdge(Edge(AN, B, 0, 'l', B));
 
-  cerr << "Added normalized contingent link!" << endl;
+  debug &&cerr << "Added normalized contingent link!" << endl;
 }

@@ -32,7 +32,9 @@ int main() {
       char A, B;
       int val;
       A = 'A' + rand() % n;
-      B = 'A' + rand() % n;
+      do {
+        B = 'A' + rand() % n;
+      } while (B == A);
       val = rand() % 40 - 20; // [-20:20]
 
       fout << A << " " << val << " " << B << '\n';
@@ -42,7 +44,9 @@ int main() {
       char A, B;
       int lo, range;
       A = 'A' + rand() % n;
-      B = 'A' + rand() % n;
+      do {
+        B = 'A' + rand() % n;
+      } while (B == A);
       lo = rand() % 20;
       range = rand() % 10;
 

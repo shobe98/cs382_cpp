@@ -16,13 +16,13 @@ A -13 B
 F 15 C
 F -11 B
 G 1 B
-G 17 G
-G -2 G
-B -9 C
-G 10 E
+G -6 F
+C -20 D
+E 4 B
+F 15 G
 # Contingent Links
-C 16 21 F
 F 7 11 B
 B 19 28 F
 D 10 12 A
+E 3 4 C
 

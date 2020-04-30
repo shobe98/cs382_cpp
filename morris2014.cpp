@@ -43,14 +43,14 @@ inline bool unsuitable(const Edge &e, const int &starting_label) {
 // the queue, I've done this multiple times with dijkstra, and the time
 // difference is not significant enough to make it reasonable to implement a
 // heap from scratch.
-bool DCBackprop(int source, STNU *stnu) {
-  DEBUG && (cerr << "Currently running DCBackprop from "
+bool DCBackprop(int source, STNU *stnu, bool debug = false) {
+  debug && (cerr << "Currently running DCBackprop from "
                  << stnu->numsToLabel[source] << endl);
   if (stnu->in_rec_stack[source]) {
     return false;
   }
   if (stnu->done[source]) {
-    cerr << "Node was processed before!" << endl;
+    debug &&cerr << "Node was processed before!" << endl;
     return true;
   }
 
@@ -96,7 +96,7 @@ bool DCBackprop(int source, STNU *stnu) {
 
     // done popping
 
-    cerr << endl << "Expanding node " << stnu->numsToLabel[u] << endl;
+    debug &&cerr << endl << "Expanding node " << stnu->numsToLabel[u] << endl;
 
     if (dist[u] >= 0) {
       // add new edge u->source
@@ -111,19 +111,21 @@ bool DCBackprop(int source, STNU *stnu) {
       // label removal rule" (where applicable).
       stnu->addEdge(Edge(u, source, dist[u], 'o'));
       // stnu->InEdges[source].push_back(Edge(u, source, dist[u], 'o'));
-      DEBUG && (cerr << "Added ord edge " << stnu->numsToLabel[u] << ' '
+      debug && (cerr << "Added ord edge " << stnu->numsToLabel[u] << ' '
                      << stnu->numsToLabel[source] << ' ' << dist[u] << endl);
       continue;
     }
 
     if (stnu->is_negative_node[u]) {
-      cerr << "about to enter recursion in " << stnu->numsToLabel[u] << endl;
-      for (int i = 0; i < stnu->N; ++i) {
-        if (dist[i] != kInf) {
-          cerr << stnu->numsToLabel[i] << ":" << dist[i] << ' ';
+      if (debug) {
+        cerr << "about to enter recursion in " << stnu->numsToLabel[u] << endl;
+        for (int i = 0; i < stnu->N; ++i) {
+          if (dist[i] != kInf) {
+            cerr << stnu->numsToLabel[i] << ":" << dist[i] << ' ';
+          }
         }
+        cerr << endl;
       }
-      cerr << endl;
 
       if (DCBackprop(u, stnu) == false) {
         return false;
@@ -144,9 +146,11 @@ bool DCBackprop(int source, STNU *stnu) {
         continue;
       }
 
-      cerr << "Processing edge ";
-      stnu->printEdge(edge);
-      cerr << endl;
+      if (debug) {
+        cerr << "Processing edge ";
+        stnu->printEdge(edge);
+        cerr << endl;
+      }
 
       int v = edge.A;
       int new_dist = dist[u] + edge.value;
@@ -155,24 +159,27 @@ bool DCBackprop(int source, STNU *stnu) {
         Q.push(NodeAndPrio(v, new_dist));
       }
     }
+    if (debug) {
+      for (int i = 0; i < stnu->N; ++i) {
+        if (dist[i] != kInf) {
+          cerr << stnu->numsToLabel[i] << ":" << dist[i] << ' ';
+        }
+      }
+      cerr << endl;
+    }
+
+    cerr << endl;
+  }
+
+  if (debug) {
+    debug &&cerr << stnu->numsToLabel[source] << "'s propagation done" << endl;
     for (int i = 0; i < stnu->N; ++i) {
       if (dist[i] != kInf) {
-        cerr << stnu->numsToLabel[i] << ":" << dist[i] << ' ';
+        debug &&cerr << stnu->numsToLabel[i] << ":" << dist[i] << ' ';
       }
     }
-    cerr << endl;
-
-    cerr << endl;
+    debug &&cerr << endl;
   }
-
-  DEBUG &&cerr << stnu->numsToLabel[source] << "'s propagation done" << endl;
-  for (int i = 0; i < stnu->N; ++i) {
-    if (dist[i] != kInf) {
-      DEBUG &&cerr << stnu->numsToLabel[i] << ":" << dist[i] << ' ';
-    }
-  }
-  DEBUG &&cerr << endl;
-
   stnu->done[source] = true;
   stnu->in_rec_stack[source] = false;
 
@@ -184,89 +191,10 @@ bool DCBackprop(int source, STNU *stnu) {
   return true;
 }
 
-// Abi's code
-STNU *parse() {
-  cerr << "PARSING!!" << endl;
-  string str;
-  getline(cin, str);
-  // typenet reads in type of network
-  string typenet;
-  cin >> typenet;
-  getline(cin, str);
-  getline(cin, str);
+bool morris2014(string filename, bool debug = false) {
+  STNU *Graph = new STNU(filename, debug);
 
-  // get n and instantiate STNU *G
-  int n, m, k;
-  cin >> n;
-  getline(cin, str);
-  getline(cin, str);
-
-  // Get M and K and save to STNU graph G
-  cin >> m;
-  getline(cin, str);
-  getline(cin, str);
-  cin >> k;
-
-  STNU *G = new STNU(n, m, k);
-
-  getline(cin, str);
-  getline(cin, str);
-
-  cerr << "Read some stuff!!" << endl;
-  // read in TPs from file
-  for (int i = 0; i < n; i++) {
-    string TP;
-    cin >> TP;
-    // pushback TP name onto numsToLabel
-    G->numsToLabel.push_back(TP);
-    // save index of TP in labelsToNum
-    G->labelsToNum[TP] = i;
-  }
-  getline(cin, str);
-  getline(cin, str);
-
-  for (int i = 0; i < G->M; i++) {
-    int A, B, value;
-    string label1, label2;
-    // reads in string names for edges and value
-    cin >> label1 >> value >> label2;
-    // finds index for each edge and saves to o
-    A = G->labelsToNum.find(label1)->second;
-    B = G->labelsToNum.find(label2)->second;
-
-    // adds incoming ord. edge to STNU graph
-    G->addEdge(Edge(A, B, value, 'o'));
-
-    getline(cin, str);
-  }
-  getline(cin, str);
-
-  // reads in Cont. Link Edges
-  for (int i = 0; i < G->K; i++) {
-    int low, high;
-    string label1, label2;
-    cin >> label1 >> low >> high >> label2;
-
-    // adds incoming cont. link edges to graph
-    G->addContLink(label1, low, high, label2, i);
-    getline(cin, str);
-  }
-  return G;
-}
-
-int main(int argc, char *argv[]) {
-  if (argc == 2) {
-    if (string(argv[1]) == "--verbose") {
-      DEBUG = 1;
-    } else {
-      cout << "Usage: ./morris2014  [--verbose]" << endl;
-      exit(1);
-    }
-  }
-
-  STNU *Graph = parse();
-
-  cerr << "Done reading!" << endl;
+  debug &&cerr << "Done reading!" << endl;
 
   for (int i = 0; i < Graph->N; ++i) {
     for (auto &edge : Graph->InEdges[i]) {
@@ -277,19 +205,39 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  cerr << "Done finding negative nodes!" << endl;
+  debug &&cerr << "Done finding negative nodes!" << endl;
 
   for (int i = 0; i < Graph->N; ++i) {
     if (Graph->is_negative_node[i]) {
       cerr << "Going to call DCBackprop from main!" << endl;
       if (!DCBackprop(i, Graph)) {
-        cout << "Not DC!" << endl;
-        return 0;
+        debug &&cout << "Not DC!" << endl;
+        return false;
       }
     }
   }
 
-  cout << "DC!" << endl;
+  debug &&cout << "DC!" << endl;
+  return true;
+}
+
+int main(int argc, char *argv[]) {
+  if (argc >= 3) {
+    if (string(argv[1]) == "--verbose=true") {
+      DEBUG = 1;
+
+    } else if (string(argv[1]) != "--verbose=false") {
+      cout << "Usage: ./morris2014  --verbose={true/false} testfile "
+              "[testfiles..]"
+           << endl;
+      exit(1);
+    }
+  }
+
+  for (int i = 2; i < argc; ++i) {
+    cout << argv[i] << " Morris 2014: " << morris2014(string(argv[i]), DEBUG)
+         << endl;
+  }
 
   return 0;
 }

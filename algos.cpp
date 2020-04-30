@@ -35,30 +35,66 @@ struct NodeAndPrio {
  * found.
  */
 vector<int> bellman_ford(STNU *stnu) {
+  cout << "RUNNING "
+          "BELLMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+          "AAAAAAAAAAAAAAAAAAAAAAAAAAAN"
+       << endl;
   vector<int> distance(stnu->N,
                        0); // this will be the potential function as well
+
+  vector<int> parent(stnu->N, -1);
 
   // for best performance of bellman this can be optimized by implementing the
   // queue version
   for (int i = 1; i < stnu->N; ++i) {
     for (auto &edge : stnu->ordEdgesList) {
-      distance[edge.B] = min(distance[edge.B], distance[edge.A] + edge.value);
+      if (distance[edge.A] + edge.value < distance[edge.B]) {
+        distance[edge.B] = min(distance[edge.B], distance[edge.A] + edge.value);
+        parent[edge.B] = edge.A;
+      }
     }
     for (auto &edge : stnu->ucEdgesList) {
-      distance[edge.B] = min(distance[edge.B], distance[edge.A] + edge.value);
+      if (distance[edge.A] + edge.value < distance[edge.B]) {
+        distance[edge.B] = min(distance[edge.B], distance[edge.A] + edge.value);
+        parent[edge.B] = edge.A;
+      }
     }
   }
 
+  int start = -1;
+  int end = -1;
   // check for negative cycles
   for (auto &edge : stnu->ordEdgesList) {
     if (distance[edge.B] > distance[edge.A] + edge.value) {
       stnu->has_negative_cycle = true;
+      start = edge.B;
+      end = edge.A;
     }
   }
   for (auto &edge : stnu->ucEdgesList) {
     if (distance[edge.B] > distance[edge.A] + edge.value) {
       stnu->has_negative_cycle = true;
+      start = edge.B;
+      end = edge.A;
     }
+  }
+
+  if (stnu->has_negative_cycle) {
+    vector<int> cycle;
+    vector<bool> visited(stnu->N, false);
+    while (end != start && !visited[end]) {
+      visited[end] = true;
+      cycle.push_back(end);
+      end = parent[end];
+      assert(end != parent[end]);
+    }
+
+    cout << "Cycle found!" << endl;
+    reverse(cycle.begin(), cycle.end());
+    for (auto it : cycle) {
+      cout << stnu->numsToLabel[it] << " ";
+    }
+    cout << endl;
   }
 
   return distance;
