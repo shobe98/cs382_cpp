@@ -7,6 +7,16 @@ To run code, type the following into the command line:
   2. ./main < tests/name_of_test_file
       i.e. ./main < tests/dc-2.stnu
 
+Or, for morris2014
+  1. make morris2014
+  2. ./morris2014 --verbose=false tests/magic-loop-2.stnu tests/magic-loop-3.stnu tests/dc-2.stnu tests/dc-3.stnu 
+  
+Sample output:
+  tests/magic-loop-2.stnu Morris 2014: 0
+  tests/magic-loop-3.stnu Morris 2014: 0
+  tests/dc-2.stnu Morris 2014: 1
+  tests/dc-3.stnu Morris 2014: 1
+
 Our code implementing the Morris 2006 algorithm is made up of five parts: 
 graph.h, graph.cpp, algos.h, algos.cpp, and main.cpp. 
 
