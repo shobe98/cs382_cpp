@@ -2,6 +2,7 @@
 #define _GRAPH2014_H_
 
 #include <cassert>
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <unordered_map>
@@ -10,7 +11,7 @@ using std::string;
 using std::to_string;
 using std::unordered_map;
 using std::vector;
-
+using namespace std;
 /*
  * Edge Struct
  * Member Variables: int A: start TP,
@@ -77,6 +78,78 @@ public:
 
     InEdges = vector<vector<Edge>>(N, vector<Edge>());
     indexEdges = vector<vector<int>>(N, vector<int>(N, kNaN));
+  }
+
+  STNU(string filename, bool debug = false) {
+    ifstream fin(filename);
+
+    debug &&cerr << "PARSING!!" << endl;
+    string str;
+    getline(fin, str);
+
+    // typenet reads in type of network
+    string typenet;
+    fin >> typenet;
+
+    getline(fin, str);
+    getline(fin, str);
+
+    // get n and instantiate STNU *G
+    int n, m, k;
+    fin >> n;
+    getline(fin, str);
+    getline(fin, str);
+
+    // Get M and K and save to STNU graph G
+    fin >> m;
+    getline(fin, str);
+    getline(fin, str);
+    fin >> k;
+
+    // Initialize constructor as we used to
+    STNU(n, m, k);
+
+    getline(fin, str);
+    getline(fin, str);
+
+    // read in TPs from file
+    for (int i = 0; i < n; i++) {
+      string TP;
+      fin >> TP;
+      // pushback TP name onto numsToLabel
+      this->numsToLabel.push_back(TP);
+      // save index of TP in labelsToNum
+      this->labelsToNum[TP] = i;
+    }
+    getline(fin, str);
+    getline(fin, str);
+
+    for (int i = 0; i < this->M; i++) {
+      int A, B, value;
+      string label1, label2;
+      // reads in string names for edges and value
+      fin >> label1 >> value >> label2;
+      // finds index for each edge and saves to o
+      A = this->labelsToNum.find(label1)->second;
+      B = this->labelsToNum.find(label2)->second;
+
+      // adds incoming ord. edge to STNU graph
+      this->addEdge(Edge(A, B, value, 'o'));
+
+      getline(fin, str);
+    }
+    getline(fin, str);
+
+    // reads in Cont. Link Edges
+    for (int i = 0; i < this->K; i++) {
+      int low, high;
+      string label1, label2;
+      fin >> label1 >> low >> high >> label2;
+
+      // adds incoming cont. link edges to graph
+      this->addContLink(label1, low, high, label2, i);
+      getline(fin, str);
+    }
   }
 
   void addEdge(const Edge &e);
