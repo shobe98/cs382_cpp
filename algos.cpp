@@ -46,7 +46,7 @@ vector<int> bellman_ford(STNU *stnu) {
 
   // for best performance of bellman this can be optimized by implementing the
   // queue version
-  for (int i = 1; i < stnu->N; ++i) {
+ for (int i = 1; i < stnu->N; ++i) {
     for (auto &edge : stnu->ordEdgesList) {
       if (distance[edge.A] + edge.value < distance[edge.B]) {
         distance[edge.B] = min(distance[edge.B], distance[edge.A] + edge.value);

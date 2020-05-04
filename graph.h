@@ -6,13 +6,15 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <fstream>
 using std::string;
 using std::unordered_map;
 using std::vector;
+using namespace std;
 
 struct Neighbour {
   int index; // the index of the neighbouring label -> one can get the edge from
-             // the edge vector.
+  // the edge vector.
   char c;    // type of edge, o - ordinary, l - lower case, u - upper case
 
   Neighbour(int index = 0, char c = 0) {
@@ -57,65 +59,162 @@ struct CaseEdge {
     this->B = B;
   }
 }; // there will be a vector of lower case edges and a vector of upper case
-   // edges
+// edges
 
 class STNU {
-public:
-  // since the algorithm is O(n^4) running on more than 1000 would crash the
-  // computer, so for now let the max number of labels be 1000
-  static const int kMaxLabels = 1000;
+  public:
+    // since the algorithm is O(n^4) running on more than 1000 would crash the
+    // computer, so for now let the max number of labels be 1000
+    static const int kMaxLabels = 1000;
 
-  // -INF, a value we use to code missing values, edges etc
-  static const int kNaN = -1; // -1 for now
+    // -INF, a value we use to code missing values, edges etc
+    static const int kNaN = -1; // -1 for now
 
-  // Labels, Ord Edges, Cont Links
-  int N, M, K;
+    // Labels, Ord Edges, Cont Links
+    int N, M, K;
 
-  bool has_negative_cycle = false;
+    bool has_negative_cycle = false;
 
-  // mappings between labels and ints and back
-  unordered_map<string, int> labelsToNum;
-  vector<string> numsToLabel;
+    // mappings between labels and ints and back
+    unordered_map<string, int> labelsToNum;
+    vector<string> numsToLabel;
 
-  // These  matrices are necessary to make sure we don't save duplicated edges
-  // (that would fuck up the complexity - say if an edge gets updated n times,
-  // we would otherwise have ncopies of it) I know this makes the code slightly
-  // messier, but should be fine for now index to the edge in the vector of
-  // edges or -1
-  vector<vector<int>> ordEdges;
-  vector<vector<int>> ucEdges;
-  vector<vector<int>> lcEdges;
+    //True if debugging printfs are enabled;
+    bool debug;
 
-  // to get the allmax edges iterate first through the ordinary edges and then
-  // through the uc edges, assigning high to each contlink
-  vector<OrdEdge> ordEdgesList;
-  vector<CaseEdge> ucEdgesList;
-  vector<CaseEdge> lcEdgesList;
+    // These  matrices are necessary to make sure we don't save duplicated edges
+    // (that would fuck up the complexity - say if an edge gets updated n times,
+    // we would otherwise have ncopies of it) I know this makes the code slightly
+    // messier, but should be fine for now index to the edge in the vector of
+    // edges or -1
+    vector<vector<int>> ordEdges;
+    vector<vector<int>> ucEdges;
+    vector<vector<int>> lcEdges;
 
-  // in these two vectors we save the edges we want to add to the graph.
-  vector<OrdEdge> bufferOrdEdges;
-  vector<CaseEdge> bufferUcEdges;
+    // to get the allmax edges iterate first through the ordinary edges and then
+    // through the uc edges, assigning high to each contlink
+    vector<OrdEdge> ordEdgesList;
+    vector<CaseEdge> ucEdgesList;
+    vector<CaseEdge> lcEdgesList;
 
-  // Lists of neighbours -> basically the matrices prof Hunsberger showed us.
-  vector<vector<Neighbour>> ordNeighbours;
-  vector<vector<Neighbour>> ucNeighbours;
+    // in these two vectors we save the edges we want to add to the graph.
+    vector<OrdEdge> bufferOrdEdges;
+    vector<CaseEdge> bufferUcEdges;
 
-  STNU(int n) {
-    this->N = n;
+    // Lists of neighbours -> basically the matrices prof Hunsberger showed us.
+    vector<vector<Neighbour>> ordNeighbours;
+    vector<vector<Neighbour>> ucNeighbours;
+/*
+    STNU(int n) {
+      this->N = n;
 
-    ordEdges = vector<vector<int>>(n, vector<int>(n, kNaN));
-    ucEdges = vector<vector<int>>(n, vector<int>(n, kNaN));
-    lcEdges = vector<vector<int>>(n, vector<int>(n, kNaN));
+      ordEdges = vector<vector<int>>(n, vector<int>(n, kNaN));
+      ucEdges = vector<vector<int>>(n, vector<int>(n, kNaN));
+      lcEdges = vector<vector<int>>(n, vector<int>(n, kNaN));
 
-    ordNeighbours = vector<vector<Neighbour>>(n, vector<Neighbour>());
-    ucNeighbours = vector<vector<Neighbour>>(n, vector<Neighbour>());
-  }
+      ordNeighbours = vector<vector<Neighbour>>(n, vector<Neighbour>());
+      ucNeighbours = vector<vector<Neighbour>>(n, vector<Neighbour>());
+    }
+*/
+    STNU(string filename, bool _debug = false) {
 
-  void addEdge(const OrdEdge &e);
-  void addEdge(const ContLinkEdge &e);
-  void addUpperCaseEdge(const CaseEdge &e);
+      this->debug = debug;
+      ifstream fin(filename);
 
-  void updateAllBufferedEdges();
+      debug &&cerr << "PARSING!!" << endl;
+      string str;
+      getline(fin, str);
+
+      // typenet reads in type of network
+      string typenet;
+      fin >> typenet;
+
+      getline(fin, str);
+      getline(fin, str);
+
+      // get n
+      fin >> this->N;
+
+      ordEdges = vector<vector<int>>(this->N, vector<int>(this->N, kNaN));
+      ucEdges = vector<vector<int>>(this->N, vector<int>(this->N, kNaN));
+      lcEdges = vector<vector<int>>(this->N, vector<int>(this->N, kNaN));
+
+      ordNeighbours = vector<vector<Neighbour>>(this->N, vector<Neighbour>());
+      ucNeighbours = vector<vector<Neighbour>>(this->N, vector<Neighbour>());
+      
+      getline(fin, str);
+      getline(fin, str);
+
+      //Get M and K and save to STNU graph
+      fin >> this->M;
+
+      getline(fin, str);
+      getline(fin, str);
+
+      fin >> this->K;
+
+      getline(fin, str);
+      getline(fin, str);
+
+      cout << this->N << this->M << this->K << endl;
+
+      // read in TPs from file
+      for (int i = 0; i < this->N; i++) {
+        string TP;
+        fin >> TP;
+        // pushback TP name onto numsToLabel
+        this->numsToLabel.push_back(TP);
+        // save index of TP in labelsToNum
+        this->labelsToNum[TP] = i;
+      }
+
+      getline(fin, str);
+      getline(fin, str);
+
+      // reads in Ord. Edges
+
+      for (int i = 0; i < this->M; i++) {
+        OrdEdge o;
+        string edge1, edge2;
+        // reads in string names for edges and value
+        fin >> edge1 >> o.value >> edge2;
+        // finds index for each edge and saves to o
+
+        o.A = this->labelsToNum.find(edge1)->second;
+        o.B = this->labelsToNum.find(edge2)->second;
+        this->addEdge(o);
+        getline(fin, str);
+      }
+      getline(fin, str);
+
+      // reads in Cont. Link Edges
+      for (int i = 0; i < this->K; i++) {
+        ContLinkEdge c;
+        string edge1, edge2;
+        fin >> edge1 >> c.low >> c.high >> edge2;
+        c.A = this->labelsToNum.find(edge1)->second;
+        c.B = this->labelsToNum.find(edge2)->second;
+        this->addEdge(c);
+        getline(fin, str);
+      }
+
+      //updates buffered edges and adds them to STNU graph
+      this->updateAllBufferedEdges();
+
+      /*ordEdges = vector<vector<int>>(this->N, vector<int>(this->N, kNaN));
+      ucEdges = vector<vector<int>>(this->N, vector<int>(this->N, kNaN));
+      lcEdges = vector<vector<int>>(this->N, vector<int>(this->N, kNaN));
+
+      ordNeighbours = vector<vector<Neighbour>>(this->N, vector<Neighbour>());
+      ucNeighbours = vector<vector<Neighbour>>(this->N, vector<Neighbour>());
+    */
+    }
+
+    void addEdge(const OrdEdge &e);
+    void addEdge(const ContLinkEdge &e);
+    void addUpperCaseEdge(const CaseEdge &e);
+
+    void updateAllBufferedEdges();
 };
 
 #endif // _GRAPH_H_
