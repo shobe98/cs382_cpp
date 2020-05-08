@@ -3,10 +3,8 @@
  * Authors:  Andrei Stanciu, Abigail Ren
  * File:     algos.cpp
  * ------------------------------
- * In namespace morris2006:
  * Defines Structs: NodeAndPrio
- * Implements methods bellman_ford, is_dynamically_controllable, dijkstra,
- * getRPL, morris2006
+ * Implements methods declared in algos.h
  */
 #include "algos.h"
 #include <algorithm>
