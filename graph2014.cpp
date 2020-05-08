@@ -22,7 +22,7 @@ using std::vector;
  *  Effect: Saves an edge in the InEdges vector containing all edges
  *          or updates the edge if it already exists.
  */
-void STNU::addEdge(const Edge &e) {
+void Morris2014::STNU::addEdge(const Edge &e) {
   assert(e.A < indexEdges.size());
   assert(e.B < indexEdges[e.A].size());
   // if an edge does not exist at TP e->B in the InEdge vector
@@ -47,7 +47,7 @@ void STNU::addEdge(const Edge &e) {
  * Input:   e, an Edge
  * prints edge
  */
-void STNU::printEdge(const Edge &e) {
+void Morris2014::STNU::printEdge(const Edge &e) {
   // If this method is called, it always prints, regardless of debug flag
   // check of the debug flag should be done before calling this function
   cerr << numsToLabel[e.A] << ' ' << numsToLabel[e.B] << ' ' << e.value << ' '
@@ -60,8 +60,8 @@ void STNU::printEdge(const Edge &e) {
              cont_link_index is the index of the cont linke edge in the graph
  * adds ContLink Edge to graph
  */
-void STNU::addContLink(string &label1, int low, int high, string &label2,
-                       int cont_link_index) {
+void Morris2014::STNU::addContLink(string &label1, int low, int high,
+                                   string &label2, int cont_link_index) {
   int A = labelsToNum.find(label1)->second;
   int B = labelsToNum.find(label2)->second;
 

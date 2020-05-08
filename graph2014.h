@@ -23,6 +23,8 @@ using std::to_string;
 using std::unordered_map;
 using std::vector;
 using namespace std;
+
+namespace Morris2014 {
 /*
  * Edge Struct
  * Member Variables: int A: start TP,
@@ -80,8 +82,6 @@ public:
   vector<vector<Edge>> InEdges;
 
   // Lists of neighbours -> basically the matrices prof Hunsberger showed us.
-
-  STNU(int n, int m, int k) {}
 
   STNU(string filename, bool _debug = false) {
     this->debug = _debug;
@@ -174,4 +174,5 @@ public:
   void printEdge(const Edge &e);
 };
 
+} // namespace Morris2014
 #endif // _GRAPH2014_H_:

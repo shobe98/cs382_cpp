@@ -21,7 +21,7 @@ using namespace std;
 const int kMaxLabels = 1000;
 const int kNaN = -1; // -1 for now
 const int kInf = 0x3f3f3f3f;
-
+namespace Morris2014 {
 struct NodeAndPrio {
   int node;
   /// we very likeley need labels
@@ -227,7 +227,7 @@ bool morris2014(string filename, bool debug = false) {
   debug &&cout << "DC!" << endl;
   return true;
 }
-
+} // namespace Morris2014
 int main(int argc, char *argv[]) {
   bool debug = false;
   if (argc >= 3) {
@@ -247,7 +247,8 @@ int main(int argc, char *argv[]) {
   }
 
   for (int i = 2; i < argc; ++i) {
-    cout << argv[i] << " Morris 2014: " << morris2014(string(argv[i]), debug)
+    cout << argv[i]
+         << " Morris 2014: " << Morris2014::morris2014(string(argv[i]), debug)
          << endl;
   }
 

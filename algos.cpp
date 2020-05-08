@@ -5,7 +5,8 @@
  * ------------------------------
  * Implements
  * Defines Structs: NodeAndPrio
- * Defines Functions: bellman_ford, dijkstra, is_dynamically_contrallable
+ * Implements methods bellman_ford, is_dynamically_controllable, dijkstra,
+ * getRPL, morris2006
  */
 #include "algos.h"
 #include <algorithm>
@@ -19,7 +20,7 @@ using namespace std;
 using std::min;
 using std::vector;
 
-const int kInf = 0x3f3f3f3f;
+namespace Morris2006 {
 
 struct NodeAndPrio {
   int node;
@@ -36,6 +37,7 @@ struct NodeAndPrio {
     return prio > other.prio;
   }
 };
+} // namespace Morris2006
 
 /* Runs the unmodified bellman ford algorithm on the STNU.
  * Input: Any STNU
@@ -43,11 +45,11 @@ struct NodeAndPrio {
  * Side effect: Will set the has_negative_cycle flag in the STNU if one is
  * found.
  */
-vector<int> bellman_ford(STNU *stnu, bool debug=false) {
-  debug && (cout << "RUNNING BELLMAAAAAAAAAAAAAN"
-      << endl);
+vector<int> Morris2006::bellman_ford(Morris2006::STNU *stnu,
+                                     bool debug = false) {
+  debug && (cout << "RUNNING BELLMAAAAAAAAAAAAAN" << endl);
   vector<int> distance(stnu->N,
-      0); // this will be the potential function as well
+                       0); // this will be the potential function as well
 
   vector<int> parent(stnu->N, -1);
 
@@ -87,16 +89,19 @@ vector<int> bellman_ford(STNU *stnu, bool debug=false) {
   }
 
   if (stnu->has_negative_cycle) {
-    vector<int> cycle;
-    vector<bool> visited(stnu->N, false);
-    while (end != start && !visited[end]) {
-      visited[end] = true;
-      cycle.push_back(end);
-      end = parent[end];
-      assert(end != parent[end]);
-    }
+    // Negative cycle detection is correct.
+    // Anyway, printing out the actual cycle (for debugging purposes) is
+    // unreliable, and thus I suggest you to ignore this code
+    if (debug) {
+      vector<int> cycle;
+      vector<bool> visited(stnu->N, false);
+      while (end != start && !visited[end]) {
+        visited[end] = true;
+        cycle.push_back(end);
+        end = parent[end];
+        assert(end != parent[end]);
+      }
 
-    if (debug){
       cout << "Cycle found!" << endl;
       reverse(cycle.begin(), cycle.end());
       for (auto it : cycle) {
@@ -111,27 +116,29 @@ vector<int> bellman_ford(STNU *stnu, bool debug=false) {
 
 /* Contract: getRPL(x, y , dijkstraDistance, f) -> int
  * Input: x,y indices of time points
- *        dijkstraDistance is the min dist. from x to y 
+ *        dijkstraDistance is the min dist. from x to y
  *        f is the potential function
  * Calculates the real path length from x to y
  */
-int getRPL(int x, int y, int dijkstraDistance, vector<int> &f) {
+int Morris2006::getRPL(int x, int y, int dijkstraDistance, vector<int> &f) {
   return dijkstraDistance + f[y] - f[x];
 }
 
 /* Contract: dijkstra(lc_Edge, f, *stnu) -> void
  * Input: CaseEdge lc_Edge is the starting lower case edge,
  *        vector<int> f is the potential function f
- *        STNU *stnu is any STNU graph
+ *        Morris2006::STNU *stnu is any STNU graph
  *        debug is boolean flag for printing debug statements
  * Starts from lower case edge lc_Edge and traverses STNU graph
  * until the function is able to reduce away the lower case edge
  */
-void dijkstra(CaseEdge lc_Edge, vector<int> &f, STNU *stnu, bool debug=false) {
-  debug && (cerr << "Dijkstra from " << stnu->numsToLabel[lc_Edge.B]
-      << " with lc edge from " << stnu->numsToLabel[lc_Edge.A] << " to "
-      << stnu->numsToLabel[lc_Edge.B] << " with label "
-      << stnu->numsToLabel[lc_Edge.C] << ":" << lc_Edge.value << endl);
+void Morris2006::dijkstra(CaseEdge lc_Edge, vector<int> &f,
+                          Morris2006::STNU *stnu, bool debug = false) {
+  debug &&
+      (cerr << "Dijkstra from " << stnu->numsToLabel[lc_Edge.B]
+            << " with lc edge from " << stnu->numsToLabel[lc_Edge.A] << " to "
+            << stnu->numsToLabel[lc_Edge.B] << " with label "
+            << stnu->numsToLabel[lc_Edge.C] << ":" << lc_Edge.value << endl);
   // The minimum distances from C (lc_edge.B) to all the nodes
   vector<int> dist(stnu->N, kInf);
   // Whether we're done processing a node or not.
@@ -160,15 +167,14 @@ void dijkstra(CaseEdge lc_Edge, vector<int> &f, STNU *stnu, bool debug=false) {
       continue;
     }
     dijkstra_done[TPnode] = true;
-    if (debug){
+    if (debug) {
 
-      cerr << endl << "Expanding node " 
-        << stnu->numsToLabel[TPnode] << endl;
+      cerr << endl << "Expanding node " << stnu->numsToLabel[TPnode] << endl;
       cerr << "Before: ";
       for (int i = 0; i < stnu->N; ++i) {
         if (dist[i] != kInf) {
-          cerr << stnu->numsToLabel[i] << ":" 
-            << getRPL(lc_Edge.B, i, dist[i], f) << ' ';
+          cerr << stnu->numsToLabel[i] << ":"
+               << getRPL(lc_Edge.B, i, dist[i], f) << ' ';
         }
       }
       cerr << endl;
@@ -208,7 +214,7 @@ void dijkstra(CaseEdge lc_Edge, vector<int> &f, STNU *stnu, bool debug=false) {
       // The lower case that came together (in a contingent link) with the
       // upper case edge ucedge
       const auto &lower_case_edge_aa_cc =
-        stnu->lcEdgesList[stnu->lcEdges[ucedge.B][ucedge.C]];
+          stnu->lcEdgesList[stnu->lcEdges[ucedge.B][ucedge.C]];
       int minv = lower_case_edge_aa_cc.value;
 
       // The label removal rule.
@@ -227,27 +233,25 @@ void dijkstra(CaseEdge lc_Edge, vector<int> &f, STNU *stnu, bool debug=false) {
         // The cross-case rule. lc_edge + (lc_edge.B ~~~~dijkstra path~~~~~>
         // ucedge.A ---(C:value)---> ucedge.B)
         stnu->addUpperCaseEdge(CaseEdge(
-              lc_Edge.A, ucedge.B, lower_case_edge_aa_cc.C, lc_Edge.value + rpl));
+            lc_Edge.A, ucedge.B, lower_case_edge_aa_cc.C, lc_Edge.value + rpl));
       }
     }
 
-    if (debug){
+    if (debug) {
       cerr << "After: ";
       for (int i = 0; i < stnu->N; ++i) {
         if (dist[i] != kInf) {
-          cerr << stnu->numsToLabel[i] << ":" 
-            << getRPL(lc_Edge.B, i, dist[i], f) << ' ';
+          cerr << stnu->numsToLabel[i] << ":"
+               << getRPL(lc_Edge.B, i, dist[i], f) << ' ';
         }
       }
       cerr << endl;
 
-
-      cerr << "\nThis is the distance vector at the end of dijkstra: " 
-        << endl;
+      cerr << "\nThis is the distance vector at the end of dijkstra: " << endl;
       for (int i = 0; i < stnu->N; ++i) {
         if (dist[i] != kInf) {
-          cerr << stnu->numsToLabel[i] << ":" 
-            << getRPL(lc_Edge.B, i, dist[i], f) << ' ';
+          cerr << stnu->numsToLabel[i] << ":"
+               << getRPL(lc_Edge.B, i, dist[i], f) << ' ';
         }
       }
       cerr << endl;
@@ -256,13 +260,13 @@ void dijkstra(CaseEdge lc_Edge, vector<int> &f, STNU *stnu, bool debug=false) {
 }
 
 /* Contract: is_dynamically_controllable(*stnu) -> bool
- * Input: STNU *stnu is any STNU graph
+ * Input: Morris2006::STNU *stnu is any STNU graph
  * Returns whether the given graph *stnu is dynamically
  * controllable or not by running bellman-ford and
  * dijkstra.
  * side effect: modifies the graph by adding new edges
  */
-bool is_dynamically_controllable(STNU *stnu) {
+bool Morris2006::is_dynamically_controllable(Morris2006::STNU *stnu) {
   for (int rep = 1; rep <= stnu->K; ++rep) {
     vector<int> f = bellman_ford(stnu); // potential function
 
@@ -287,4 +291,25 @@ bool is_dynamically_controllable(STNU *stnu) {
 
   // if no negative cycle is found
   return true;
+}
+
+/* Contract: morris2006(filename, debug)
+ * Input:    filename is name of input file
+ *           debug boolean flag for printing debug statements
+ * Calls is_dynamically_controllable and determines whether
+ * STNU graph described in the filename input is DC or not
+ */
+
+bool Morris2006::morris2006(string filename, bool debug = false) {
+  Morris2006::STNU *Graph = new Morris2006::STNU(filename, debug);
+
+  debug &&cerr << "Done reading!" << endl;
+
+  if (is_dynamically_controllable(Graph)) {
+    debug &&cout << "DC" << endl;
+    return true;
+  } else {
+    debug &&cout << "Negative cycle found!" << endl;
+    return false;
+  }
 }

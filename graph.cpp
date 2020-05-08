@@ -22,7 +22,7 @@ using std::vector;
  *  Effect: Saves an ordinary edge in a buffer vector, without modifying the
  * graph.
  */
-void STNU::addEdge(const OrdEdge &e) {
+void Morris2006::STNU::addEdge(const OrdEdge &e) {
   bufferOrdEdges.push_back(e);
 
   debug && (cerr << "Added ord edge " << numsToLabel[e.A] << ' '
@@ -41,7 +41,7 @@ void STNU::addEdge(const OrdEdge &e) {
  * ordinary edge and the one that adds an uc edge are necessary for updating the
  * graph after each iteration of the main algo.
  */
-void STNU::addEdge(const ContLinkEdge &e) {
+void Morris2006::STNU::addEdge(const ContLinkEdge &e) {
   // page 80/182 in notes
   bufferUcEdges.push_back(CaseEdge(e.B, e.A, e.B, -e.high));
 
@@ -52,7 +52,7 @@ void STNU::addEdge(const ContLinkEdge &e) {
 /* Input: An upper case edge stored in a CaseEdge struct
  *  Effect: Saves the edge in the buffer vector, without modifying the graph.
  */
-void STNU::addUpperCaseEdge(const CaseEdge &e) {
+void Morris2006::STNU::addUpperCaseEdge(const CaseEdge &e) {
   bufferUcEdges.push_back(e);
   debug && (cerr << "Added UC edge " << numsToLabel[e.A] << " to "
                  << numsToLabel[e.B] << " with label " << numsToLabel[e.C]
@@ -62,8 +62,7 @@ void STNU::addUpperCaseEdge(const CaseEdge &e) {
 /* Effect: Clears all the buffer edges while adding (or updating) the edges to
  * the graph.
  */
-void STNU::updateAllBufferedEdges() {
-  // TODO(somebody): refactor this duplicated code in a function call
+void Morris2006::STNU::updateAllBufferedEdges() {
   for (auto &e : bufferOrdEdges) {
     // if edge wasn't present add it to the list and keep track of the index in
     // the matrix
