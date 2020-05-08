@@ -1,13 +1,15 @@
 Andrei Stanciu
 Abigail Ren
-CMPU 382 - Morris 2006 Description
+CMPU 382 - Description
 
-To run code, type the following into the command line:
+Abigail: I would permit our code to be included in a public repository.
+
+To run morris2006, type the following into the command line:
   1. make main
-  2. ./main < tests/name_of_test_file
-      i.e. ./main < tests/dc-2.stnu
+  2. ./main --verbose={true/false} testfile [testfiles...]
+      i.e. ./main --verbose=false tests/dc-2.stnu
 
-Or, for morris2014
+For morris2014
   1. make morris2014
   2. ./morris2014 --verbose=false tests/magic-loop-2.stnu tests/magic-loop-3.stnu tests/dc-2.stnu tests/dc-3.stnu 
   
