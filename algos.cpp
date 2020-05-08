@@ -312,6 +312,9 @@ bool Morris2006::morris2006(string filename, bool debug = false) {
 }
 
 // Returns true if edge is unsuitable
+// starting_label is the label on the UC edge that started the backpropagation
+// or -1 if the backpropagation has been started from a node that contains no UC
+// edges.
 inline bool Morris2014::unsuitable(const Edge &e, const int &starting_label) {
   // For now an edge is unsuitable iff it is a lower case edge and it  has the
   // same label as the initial uc edge
@@ -319,11 +322,34 @@ inline bool Morris2014::unsuitable(const Edge &e, const int &starting_label) {
   return e.type != 'u' && starting_label == e.C;
 }
 
+// Note about Dijkstra implementation:
 // for comodity we don't edit nodes int the heap, but keep track of wether we're
 // done with a node or not, and thus w ecan have a node appear multiple times in
 // the queue, I've done this multiple times with dijkstra, and the time
 // difference is not significant enough to make it reasonable to implement a
 // heap from scratch.
+//
+
+/* Contract: DCBackprop(source, stnu, debug)
+ * Input:    Source is the index of the negative node to start backpropagation
+ * from. stnu is the representation in memory of an stnu debug boolean flag for
+ * printing debug statements Effects: Will add ordinary positive edges to the
+ * STNU. Output: true if there is no negative cycle containing source
+ *
+ * DCBackprop is a recursive function, and it keeps track of previous calls of
+ * DCBackprop(source). If DCBackprop is called with a source already in the
+ * recursive stack, a negative cycle has been found. If DCBackprop has ran
+ * successfully before, it returns true without repeating work.
+ *
+ * It runs a dijkstra propagation starting from source. It stops whenever the
+ * distance from source to a node is greater than 0, when it adds the
+ * coresponding edge to the graph. If during dijkstra propagation it encounters
+ * a negative node, it does a recursive call of DCBackprop on that node, and
+ * after it returns it uses the newly generated positive edges to continue the
+ * propagation.
+ *
+ */
+
 bool Morris2014::DCBackprop(int source, Morris2014::STNU *stnu,
                             bool debug = false) {
   debug && (cerr << "Currently running DCBackprop from "
@@ -472,6 +498,13 @@ bool Morris2014::DCBackprop(int source, Morris2014::STNU *stnu,
   return true;
 }
 
+/* Contract: morris2014(string filename, bool debug) -> bool
+ * Input: string filename: Formatted txt file with stnu
+ *        bool debug: Flag to toggle debugging messages.
+ * Output: True if STNU is DC.
+ * Parses the graph, marks the negative nodes and runs DCBackprop on each
+ * negative node.
+ */
 bool Morris2014::morris2014(string filename, bool debug = false) {
   Morris2014::STNU Graph(filename, debug);
 
