@@ -1,3 +1,14 @@
+/* -----------------------
+ * CMPU-382, Spring 2020
+ * Authors:  Andrei Stanciu, Abigail Ren
+ * File:     graph2014.h
+ * -----------------------
+ * Implements STNU class for Morris2014
+ * Defines Structs: Edge
+ * Abstract Functions:
+ *      addEdge, addContLinkEdge, printEdge
+ */
+
 #ifndef _GRAPH2014_H_
 #define _GRAPH2014_H_
 

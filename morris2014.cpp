@@ -1,3 +1,13 @@
+/* --------------------------
+ *  CMPU-382, Spring 2020
+ *  Authors:  Andrei Stanciu, Abigail Ren
+ *  File:     morris2014.cpp
+ * --------------------------
+ * Implements morris2014 algorithm and main function
+ * Defines Structs: NodeAndPrio
+ * Defines Functions: unsuitable, DCBackprop, morris2014, main
+ */
+
 #include "graph2014.h"
 #include <algorithm>
 #include <cassert>

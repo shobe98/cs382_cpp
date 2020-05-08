@@ -1,3 +1,11 @@
+/* -----------------------------
+ * CMPU-382, Spring 2020
+ * Authors:  Andrei Stanciu, Abigail Ren
+ * File:     graph2014.cpp
+ * -----------------------------
+ * Implements STNU class methods in graph2014.h
+ */
+
 #include "graph2014.h"
 
 #include <vector>
@@ -9,7 +17,8 @@ using std::vector;
 // Control flag to turn debugging on or off. could be passed as a user parameter
 // eventually.
 
-/*  Input: An Edge
+/*  Contract: addEdge(e)
+ *  Input: An Edge
  *  Effect: Saves an edge in the InEdges vector containing all edges
  *          or updates the edge if it already exists.
  */
@@ -34,6 +43,10 @@ void STNU::addEdge(const Edge &e) {
   }
 }
 
+/* Contract: printEdge(e)
+ * Input:   e, an Edge
+ * prints edge
+ */
 void STNU::printEdge(const Edge &e) {
   // If this method is called, it always prints, regardless of debug flag
   // check of the debug flag should be done before calling this function
@@ -41,6 +54,12 @@ void STNU::printEdge(const Edge &e) {
        << e.type;
 }
 
+/* Contract: addContLink(label1, low, high, label2, cont_link_index)
+ * Input:    label1, label2 are labels of timepoints
+             low, high are values of cont link edges
+             cont_link_index is the index of the cont linke edge in the graph
+ * adds ContLink Edge to graph
+ */
 void STNU::addContLink(string &label1, int low, int high, string &label2,
                        int cont_link_index) {
   int A = labelsToNum.find(label1)->second;
