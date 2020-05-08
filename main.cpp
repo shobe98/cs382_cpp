@@ -11,8 +11,6 @@
 #include <iostream>
 using namespace std;
 
-static int DEBUG = 0;
-
 /* Contract: morris2006(filename, debug)
  * Input:    filename is name of input file
  *           debug boolean flag for printing debug statements
@@ -26,10 +24,10 @@ bool morris2006(string filename, bool debug=false){
   debug &&cerr << "Done reading!" << endl;
 
   if (is_dynamically_controllable(Graph)) {
-    cout << "DC" << endl;
+    debug && cout << "DC" << endl;
     return true;
   } else {
-    cout << "Negative cycle found!" << endl;
+    debug && cout << "Negative cycle found!" << endl;
     return false;
   }
 }
@@ -38,9 +36,10 @@ bool morris2006(string filename, bool debug=false){
  * Sets debug flag and calls morris2006
  */
 int main(int argc, char *argv[]) {
+  bool debug = false;
   if (argc >=3) {
     if (string(argv[1])=="--verbose=true") {
-      DEBUG = 1;
+      debug = true;
 
     }
     else if (string(argv[1]) !="--verbose=false") {
@@ -53,7 +52,7 @@ int main(int argc, char *argv[]) {
 
   for (int i=2; i < argc; ++i){
     cout << argv[i] << " Morris 2006: " 
-      << morris2006(string(argv[i]),DEBUG)
+      << morris2006(string(argv[i]),debug)
       << endl;
   }
   return 0;

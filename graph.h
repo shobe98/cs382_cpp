@@ -121,7 +121,7 @@ class STNU {
 */
     STNU(string filename, bool _debug = false) {
 
-      this->debug = debug;
+      this->debug = _debug;
       ifstream fin(filename);
 
       debug &&cerr << "PARSING!!" << endl;

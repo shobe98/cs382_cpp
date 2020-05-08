@@ -13,7 +13,7 @@
 #include "graph.h"
 using std::vector;
 
-vector<int> bellman_ford(STNU *stnu);
+vector<int> bellman_ford(STNU *stnu,bool debug);
 bool is_dynamically_controllable(STNU *stnu); 
 
 #endif // _ALGOS_H_

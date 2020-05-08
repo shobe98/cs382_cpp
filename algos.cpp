@@ -43,8 +43,8 @@ struct NodeAndPrio {
  * Side effect: Will set the has_negative_cycle flag in the STNU if one is
  * found.
  */
-vector<int> bellman_ford(STNU *stnu) {
-  stnu->debug && (cout << "RUNNING BELLMAAAAAAAAAAAAAN"
+vector<int> bellman_ford(STNU *stnu, bool debug=false) {
+  debug && (cout << "RUNNING BELLMAAAAAAAAAAAAAN"
       << endl);
   vector<int> distance(stnu->N,
       0); // this will be the potential function as well
@@ -96,7 +96,7 @@ vector<int> bellman_ford(STNU *stnu) {
       assert(end != parent[end]);
     }
 
-    if (stnu->debug){
+    if (debug){
       cout << "Cycle found!" << endl;
       reverse(cycle.begin(), cycle.end());
       for (auto it : cycle) {
@@ -123,11 +123,12 @@ int getRPL(int x, int y, int dijkstraDistance, vector<int> &f) {
  * Input: CaseEdge lc_Edge is the starting lower case edge,
  *        vector<int> f is the potential function f
  *        STNU *stnu is any STNU graph
+ *        debug is boolean flag for printing debug statements
  * Starts from lower case edge lc_Edge and traverses STNU graph
  * until the function is able to reduce away the lower case edge
  */
-void dijkstra(CaseEdge lc_Edge, vector<int> &f, STNU *stnu) {
-  stnu->debug && (cerr << "Dijkstra from " << stnu->numsToLabel[lc_Edge.B]
+void dijkstra(CaseEdge lc_Edge, vector<int> &f, STNU *stnu, bool debug=false) {
+  debug && (cerr << "Dijkstra from " << stnu->numsToLabel[lc_Edge.B]
       << " with lc edge from " << stnu->numsToLabel[lc_Edge.A] << " to "
       << stnu->numsToLabel[lc_Edge.B] << " with label "
       << stnu->numsToLabel[lc_Edge.C] << ":" << lc_Edge.value << endl);
@@ -159,7 +160,7 @@ void dijkstra(CaseEdge lc_Edge, vector<int> &f, STNU *stnu) {
       continue;
     }
     dijkstra_done[TPnode] = true;
-    if (stnu->debug){
+    if (debug){
 
       cerr << endl << "Expanding node " 
         << stnu->numsToLabel[TPnode] << endl;
@@ -230,7 +231,7 @@ void dijkstra(CaseEdge lc_Edge, vector<int> &f, STNU *stnu) {
       }
     }
 
-    if (stnu->debug){
+    if (debug){
       cerr << "After: ";
       for (int i = 0; i < stnu->N; ++i) {
         if (dist[i] != kInf) {
