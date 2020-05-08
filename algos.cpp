@@ -1,3 +1,12 @@
+/* ------------------------------
+ * CMPU-382, Spring 2020
+ * Authors:  Andrei Stanciu, Abigail Ren
+ * File:     algos.cpp
+ * ------------------------------
+ * Implements
+ * Defines Structs: NodeAndPrio
+ * Defines Functions: bellman_ford, dijkstra, is_dynamically_contrallable
+ */
 #include "algos.h"
 #include <algorithm>
 #include <cassert>
@@ -35,18 +44,16 @@ struct NodeAndPrio {
  * found.
  */
 vector<int> bellman_ford(STNU *stnu) {
-  cout << "RUNNING "
-          "BELLMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-          "AAAAAAAAAAAAAAAAAAAAAAAAAAAN"
-       << endl;
+  stnu->debug && (cout << "RUNNING BELLMAAAAAAAAAAAAAN"
+      << endl);
   vector<int> distance(stnu->N,
-                       0); // this will be the potential function as well
+      0); // this will be the potential function as well
 
   vector<int> parent(stnu->N, -1);
 
   // for best performance of bellman this can be optimized by implementing the
   // queue version
- for (int i = 1; i < stnu->N; ++i) {
+  for (int i = 1; i < stnu->N; ++i) {
     for (auto &edge : stnu->ordEdgesList) {
       if (distance[edge.A] + edge.value < distance[edge.B]) {
         distance[edge.B] = min(distance[edge.B], distance[edge.A] + edge.value);
@@ -89,17 +96,25 @@ vector<int> bellman_ford(STNU *stnu) {
       assert(end != parent[end]);
     }
 
-    cout << "Cycle found!" << endl;
-    reverse(cycle.begin(), cycle.end());
-    for (auto it : cycle) {
-      cout << stnu->numsToLabel[it] << " ";
+    if (stnu->debug){
+      cout << "Cycle found!" << endl;
+      reverse(cycle.begin(), cycle.end());
+      for (auto it : cycle) {
+        cout << stnu->numsToLabel[it] << " ";
+      }
+      cout << endl;
     }
-    cout << endl;
   }
 
   return distance;
 }
 
+/* Contract: getRPL(x, y , dijkstraDistance, f) -> int
+ * Input: x,y indices of time points
+ *        dijkstraDistance is the min dist. from x to y 
+ *        f is the potential function
+ * Calculates the real path length from x to y
+ */
 int getRPL(int x, int y, int dijkstraDistance, vector<int> &f) {
   return dijkstraDistance + f[y] - f[x];
 }
@@ -112,10 +127,10 @@ int getRPL(int x, int y, int dijkstraDistance, vector<int> &f) {
  * until the function is able to reduce away the lower case edge
  */
 void dijkstra(CaseEdge lc_Edge, vector<int> &f, STNU *stnu) {
-  cerr << "Dijkstra from " << stnu->numsToLabel[lc_Edge.B]
-       << " with lc edge from " << stnu->numsToLabel[lc_Edge.A] << " to "
-       << stnu->numsToLabel[lc_Edge.B] << " with label "
-       << stnu->numsToLabel[lc_Edge.C] << ":" << lc_Edge.value << endl;
+  stnu->debug && (cerr << "Dijkstra from " << stnu->numsToLabel[lc_Edge.B]
+      << " with lc edge from " << stnu->numsToLabel[lc_Edge.A] << " to "
+      << stnu->numsToLabel[lc_Edge.B] << " with label "
+      << stnu->numsToLabel[lc_Edge.C] << ":" << lc_Edge.value << endl);
   // The minimum distances from C (lc_edge.B) to all the nodes
   vector<int> dist(stnu->N, kInf);
   // Whether we're done processing a node or not.
@@ -144,17 +159,19 @@ void dijkstra(CaseEdge lc_Edge, vector<int> &f, STNU *stnu) {
       continue;
     }
     dijkstra_done[TPnode] = true;
+    if (stnu->debug){
 
-    cerr << endl << "Expanding node " << stnu->numsToLabel[TPnode] << endl;
-    cerr << "Before: ";
-    for (int i = 0; i < stnu->N; ++i) {
-      if (dist[i] != kInf) {
-        cerr << stnu->numsToLabel[i] << ":" << getRPL(lc_Edge.B, i, dist[i], f)
-             << ' ';
+      cerr << endl << "Expanding node " 
+        << stnu->numsToLabel[TPnode] << endl;
+      cerr << "Before: ";
+      for (int i = 0; i < stnu->N; ++i) {
+        if (dist[i] != kInf) {
+          cerr << stnu->numsToLabel[i] << ":" 
+            << getRPL(lc_Edge.B, i, dist[i], f) << ' ';
+        }
       }
+      cerr << endl;
     }
-    cerr << endl;
-
     int rpl = TPval + f[TPnode] - f[lc_Edge.B];
     assert(rpl == getRPL(lc_Edge.B, TPnode, TPval, f));
     if (rpl < 0) {
@@ -190,7 +207,7 @@ void dijkstra(CaseEdge lc_Edge, vector<int> &f, STNU *stnu) {
       // The lower case that came together (in a contingent link) with the
       // upper case edge ucedge
       const auto &lower_case_edge_aa_cc =
-          stnu->lcEdgesList[stnu->lcEdges[ucedge.B][ucedge.C]];
+        stnu->lcEdgesList[stnu->lcEdges[ucedge.B][ucedge.C]];
       int minv = lower_case_edge_aa_cc.value;
 
       // The label removal rule.
@@ -209,27 +226,32 @@ void dijkstra(CaseEdge lc_Edge, vector<int> &f, STNU *stnu) {
         // The cross-case rule. lc_edge + (lc_edge.B ~~~~dijkstra path~~~~~>
         // ucedge.A ---(C:value)---> ucedge.B)
         stnu->addUpperCaseEdge(CaseEdge(
-            lc_Edge.A, ucedge.B, lower_case_edge_aa_cc.C, lc_Edge.value + rpl));
+              lc_Edge.A, ucedge.B, lower_case_edge_aa_cc.C, lc_Edge.value + rpl));
       }
     }
-    cerr << "After: ";
-    for (int i = 0; i < stnu->N; ++i) {
-      if (dist[i] != kInf) {
-        cerr << stnu->numsToLabel[i] << ":" << getRPL(lc_Edge.B, i, dist[i], f)
-             << ' ';
-      }
-    }
-    cerr << endl;
-  }
 
-  cerr << "\nThis is the distance vector at the end of dijkstra: " << endl;
-  for (int i = 0; i < stnu->N; ++i) {
-    if (dist[i] != kInf) {
-      cerr << stnu->numsToLabel[i] << ":" << getRPL(lc_Edge.B, i, dist[i], f)
-           << ' ';
+    if (stnu->debug){
+      cerr << "After: ";
+      for (int i = 0; i < stnu->N; ++i) {
+        if (dist[i] != kInf) {
+          cerr << stnu->numsToLabel[i] << ":" 
+            << getRPL(lc_Edge.B, i, dist[i], f) << ' ';
+        }
+      }
+      cerr << endl;
+
+
+      cerr << "\nThis is the distance vector at the end of dijkstra: " 
+        << endl;
+      for (int i = 0; i < stnu->N; ++i) {
+        if (dist[i] != kInf) {
+          cerr << stnu->numsToLabel[i] << ":" 
+            << getRPL(lc_Edge.B, i, dist[i], f) << ' ';
+        }
+      }
+      cerr << endl;
     }
   }
-  cerr << endl;
 }
 
 /* Contract: is_dynamically_controllable(*stnu) -> bool

@@ -1,3 +1,14 @@
+/* --------------------------------
+ *  CMPU-382, Spring 2020
+ *  Authors:  Andrei Stanciu, Abigail Ren
+ *  File:     graph.h
+ * --------------------------------
+ *  Implements STNU class
+ *  Defines Structs: Neighbour, OrdEdge, ContLinkEdge, CaseEdge
+ *  Abstract Functions: addEdge(OrdEdge), addEdge(ContLinkEdge),
+ *                      addUpperCaseEdge(CaseEdge), updateAllBufferedEdges()
+ */
+
 #ifndef _GRAPH_H_
 #define _GRAPH_H_
 
@@ -105,16 +116,8 @@ class STNU {
     vector<vector<Neighbour>> ordNeighbours;
     vector<vector<Neighbour>> ucNeighbours;
 /*
-    STNU(int n) {
-      this->N = n;
-
-      ordEdges = vector<vector<int>>(n, vector<int>(n, kNaN));
-      ucEdges = vector<vector<int>>(n, vector<int>(n, kNaN));
-      lcEdges = vector<vector<int>>(n, vector<int>(n, kNaN));
-
-      ordNeighbours = vector<vector<Neighbour>>(n, vector<Neighbour>());
-      ucNeighbours = vector<vector<Neighbour>>(n, vector<Neighbour>());
-    }
+    Constructor: STNU(filename, debug) 
+    Parses information from filename and saves directly to class variables
 */
     STNU(string filename, bool _debug = false) {
 
@@ -155,8 +158,6 @@ class STNU {
 
       getline(fin, str);
       getline(fin, str);
-
-      cout << this->N << this->M << this->K << endl;
 
       // read in TPs from file
       for (int i = 0; i < this->N; i++) {
@@ -200,14 +201,6 @@ class STNU {
 
       //updates buffered edges and adds them to STNU graph
       this->updateAllBufferedEdges();
-
-      /*ordEdges = vector<vector<int>>(this->N, vector<int>(this->N, kNaN));
-      ucEdges = vector<vector<int>>(this->N, vector<int>(this->N, kNaN));
-      lcEdges = vector<vector<int>>(this->N, vector<int>(this->N, kNaN));
-
-      ordNeighbours = vector<vector<Neighbour>>(this->N, vector<Neighbour>());
-      ucNeighbours = vector<vector<Neighbour>>(this->N, vector<Neighbour>());
-    */
     }
 
     void addEdge(const OrdEdge &e);

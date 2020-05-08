@@ -1,3 +1,11 @@
+/* --------------------------------
+ * CMPU-382, Spring 2020
+ * Authors:  Andrei Stanciu, Abigail Ren
+ * File:     graph.cpp
+ * --------------------------------
+ * Implements STNU class methods defined in graph.h
+ */
+
 #include "graph.h"
 
 #include <vector>
@@ -17,7 +25,7 @@ using std::vector;
 void STNU::addEdge(const OrdEdge &e) {
   bufferOrdEdges.push_back(e);
 
-  DEBUG && (cerr << "Added ord edge " << numsToLabel[e.A] << ' '
+  debug && (cerr << "Added ord edge " << numsToLabel[e.A] << ' '
                  << numsToLabel[e.B] << ' ' << e.value << endl);
 }
 
@@ -46,7 +54,7 @@ void STNU::addEdge(const ContLinkEdge &e) {
  */
 void STNU::addUpperCaseEdge(const CaseEdge &e) {
   bufferUcEdges.push_back(e);
-  DEBUG && (cerr << "Added UC edge " << numsToLabel[e.A] << " to "
+  debug && (cerr << "Added UC edge " << numsToLabel[e.A] << " to "
                  << numsToLabel[e.B] << " with label " << numsToLabel[e.C]
                  << ':' << e.value << endl);
 }
@@ -96,5 +104,5 @@ void STNU::updateAllBufferedEdges() {
   bufferOrdEdges.clear();
   bufferUcEdges.clear();
 
-  DEBUG && (cerr << "Done updating the graph!" << endl);
+  debug && (cerr << "Done updating the graph!" << endl);
 }

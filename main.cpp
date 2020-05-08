@@ -1,6 +1,9 @@
-/* 
-   main.cpp
-   Abigail Ren, Andrei Stanciu
+/* ----------------------------- 
+   CMPU-382, Spring 2020
+   Authors:  Abigail Ren, Andrei Stanciu
+   File:     main.cpp
+   ------------------------------
+   Defines Functions: morris2006, main
  */
 
 #include "algos.h" // include graph.cpp
@@ -95,12 +98,14 @@ return G;
 }
 */
 
-/*morris2006()
-
+/* Contract: morris2006(filename, debug)
+ * Input:    filename is name of input file
+ *           debug boolean flag for printing debug statements
+ * Calls is_dynamically_controllable and determines whether
+ * STNU graph described in the filename input is DC or not
  */
 
 bool morris2006(string filename, bool debug=false){
-  cout << "Do i get here?";
   STNU *Graph = new STNU(filename,debug);
 
   debug &&cerr << "Done reading!" << endl;
@@ -115,9 +120,7 @@ bool morris2006(string filename, bool debug=false){
 }
 
 /* Contract: main()
- * Initiates graph by parsing file
- * Determines if the graph is dynamically_controllable
- * and prints result.
+ * Sets debug flag and calls morris2006
  */
 int main(int argc, char *argv[]) {
   if (argc >=3) {
@@ -138,14 +141,5 @@ int main(int argc, char *argv[]) {
       << morris2006(string(argv[i]),DEBUG)
       << endl;
   }
-  /*
-     STNU *Graph = new STNU(filename);
-
-     if (is_dynamically_controllable(Graph)) {
-     cout << "DC" << endl;
-     } else {
-     cout << "Negative cycle found!" << endl;
-     }
-   */
   return 0;
 }

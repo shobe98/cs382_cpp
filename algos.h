@@ -1,3 +1,11 @@
+/* --------------------
+ * CMPU-382, Spring2020
+ * Authors:  Andrei Stanciu, Abigail Ren
+ * File:     algos.h
+ * --------------------
+ * Instantiates methods bellman_ford, is_dynamically_controllable
+ */
+
 #ifndef _ALGOS_H_
 #define _ALGOS_H_
 
