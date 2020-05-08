@@ -19,19 +19,25 @@ int main(int argc, char *argv[]) {
   if (argc >= 3) {
     if (string(argv[1]) == "--verbose=true") {
       debug = true;
-
     } else if (string(argv[1]) != "--verbose=false") {
-      cout << "Usage: ./main --verbose={true/false} testfile "
+      cout << "Usage: ./morris2014  --verbose={true/false} testfile "
               "[testfiles..]"
            << endl;
       exit(1);
     }
+  } else {
+    cout << "Usage: ./morris2014  --verbose={true/false} testfile "
+            "[testfiles..]"
+         << endl;
+    exit(1);
   }
 
   for (int i = 2; i < argc; ++i) {
     cout << argv[i]
          << " Morris 2006: " << Morris2006::morris2006(string(argv[i]), debug)
+         << " | Morris 2014: " << Morris2014::morris2014(string(argv[i]), debug)
          << endl;
   }
+
   return 0;
 }
